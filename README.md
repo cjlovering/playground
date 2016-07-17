@@ -28,7 +28,7 @@ I am currently using browserify to compile the app into a single file. If you wa
 git clone https://github.com/cjlovering/Playground.git
 ```
 ```node
-npm run install
+npm install
 ```
 ```node
 npm run build
