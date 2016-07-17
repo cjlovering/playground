@@ -1,0 +1,30 @@
+{
+  "name": "playground",
+  "version": "1.0.0",
+  "description": "Platform for visual displays powered by ReactJS and HTML5 canvas.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "browserify -t [ babelify --presets [ react ] ] src/scripts/index.js -o build/app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cjlovering/Playground.git"
+  },
+  "keywords": [
+    "displays"
+  ],
+  "author": "Charles Lovering",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cjlovering/Playground/issues"
+  },
+  "homepage": "https://github.com/cjlovering/Playground#readme",
+  "dependencies": {
+    "babel-preset-react": "^6.11.1",
+    "babelify": "^7.3.0",
+    "jquery": "^3.1.0",
+    "react": "^15.2.1",
+    "react-dom": "^15.2.1"
+  }
+}
