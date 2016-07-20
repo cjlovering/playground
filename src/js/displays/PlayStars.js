@@ -1,6 +1,7 @@
 //react
 var React = require('react');
 var $     = require('jquery'); //installed with node
+var PlayDisplayAPI = require('./PlayDisplayAPI');
 
 //script variables
 var canvas, ctx;
@@ -188,7 +189,8 @@ var PlayStars = React.createClass({
       stars.push( new Star(i) );
   },
   loop: function(){
-    if (this.state.play == "true") requestAnimationFrame(this.loop);
+    //if (this.props.play == "true")
+    requestAnimationFrame(this.loop);//fix
     this.drawStars();
     if (seek && lagger > 0) lagger -= 10;
   },
@@ -217,10 +219,7 @@ var PlayStars = React.createClass({
     this.state.play = "false";
   },
   render: function() {
-    var c = this.props.splitView == "false" ? false : <canvas id={this.props.displayInfo.canvasId} className="playViewCanvas" width={this.props.width} height={this.props.height}> </canvas>;
-    return (
-        c
-    );
+    return PlayDisplayAPI.renderDisplay(this.props);
   }
 });
 

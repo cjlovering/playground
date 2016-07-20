@@ -1,44 +1,42 @@
 var React = require('react');
 
 var PlayViewLabel = require('./PlayViewLabel');
+var PlayActions = require('./../flux/actions/PlayActions');
+var PlayStore = require('./../flux/stores/PlayStore');
+
 
 var PlayPane = React.createClass({
-  //todo: test var di = props.displayInfo
 
   render: function() {
-    var Display;
-    var styleName;
-    switch(this.props.id){
-      case 1:
-        Display = require("./../displays/PlayStars");
-        styleName = "playViewLeftEdge";
-        break;
-      case 2:
-        Display = require("./../displays/PlayHubs");
-        styleName = "playView";
-        break;
-      case 3:
-        Display = require("./../displays/PlayHexLife");
-        styleName = "playView";
-        break;
-      case 4:
-        Display = require("./../displays/PlayGradients");
-        styleName = "playViewRightEdge";
-        break;
-    }
+    var Display = PlayStore.getDisplayModule(this.props.id);
+    var styleName = PlayStore.getPlayViewStyleName(this.props.id);
+
+    /**
+     *  passing correct styleName to children, and
+     *  classnames to to containing div.
+     */
+    var focus = this.props.focus ? " focused" : " unfocused";
 
     return (
-      <div className={styleName}>
+      <div className={styleName} onMouseEnter={this._onMouseEnter}>
         <Display displayInfo={this.props.displayInfo}
                  height={this.props.splitView.height}
                  width={this.props.splitView.width}
                  onScriptHover={this.props.onScriptHover}
                  id={this.props.id}
+                 focus={focus}
                  play="true"/>
 
-        <PlayViewLabel name={this.props.displayInfo.name} description={this.props.displayInfo.text}/>
+        <PlayViewLabel focus={focus} name={this.props.displayInfo.name} description={this.props.displayInfo.text}/>
       </div>
     );
+  },
+
+  /**
+   * call action to focus on this particular pane.
+   */
+  _onMouseEnter: function(){
+    PlayActions.focusDisplayIndex(this.props.id);
   }
 });
 

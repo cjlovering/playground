@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "browserify -t [ babelify --presets [ react ] ] src/js/app.js -o build/bundle.js",
-    "release": "browserify -t [ babelify --presets [ react ] ] src/js/app.js | uglifyjs -cm > js/bundle.min.js"
+    "release": "browserify -t [ babelify --presets [ react ] ] src/js/app.js | uglifyjs -cm > build/bundle.js"
   },
   "repository": {
     "type": "git",
@@ -29,6 +29,7 @@
     "jquery": "^3.1.0",
     "keymirror": "^0.1.1",
     "react": "^15.2.1",
-    "react-dom": "^15.2.1"
+    "react-dom": "^15.2.1",
+    "uglify": "^0.1.5"
   }
 }

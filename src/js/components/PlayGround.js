@@ -1,45 +1,20 @@
 var React = require('react');
-
+var PlayStore = require('./../flux/stores/PlayStore');
 var PlayTitlePane = require('./PlayTitlePane');
 var PlayView = require('./PlayView');
+var PlayConstants = require('./../flux/constants/PlayConstants');
 
-//todo: move into comments, use $.ajax to pull em in
-var d = [
-    {
-        "id": 1,
-        "name": "PlayStars",
-        "canvasId": "starZone",
-        "text": "Smooth interactive system of stars."
-    },
-    {
-        "id": 2,
-        "name": "PlayHubs",
-        "canvasId": "hubWay",
-        "text": "Set of hubs interconnected and moving."
-    },
-    {
-        "id": 3,
-        "name": "PlayHexLife",
-        "canvasId": "hexMap",
-        "text": "Game of life on a hexagonal grid"
-    },
-    {
-        "id": 4,
-        "name": "PlayGradients",
-        "canvasId": "pixelMap",
-        "text": "A continuous stream of gradients covering a canvas between random colors."
-    }
-];
-
-var splitView = {
-  width: "250px",
-  height: "600px",
-  live: true
-};
-
-var sizing = {
-  width: ((window.innerWidth * (1.00 - (0.03 + 0.03 + 0.02)- (0.02 * ( d.length - 2)) )) / d.length) + "px",
-  height: (window.innerHeight * 0.80) + "px"
+/**
+ * Retrieve the current data from the store
+ * @return {object}
+ */
+function getPlayState() {
+  return {
+    scriptData: PlayStore.getScriptInfo(),
+    sizing: PlayStore.getSizingInfo(),
+    viewMode: PlayStore.getViewMode(),
+    displayIndex: PlayStore.getDisplayIndex()
+  };
 }
 
 var hoverScript = -1;
@@ -55,14 +30,63 @@ function setSplitViewActive(i) {
   return i; //i is the index of the active script
 }
 
+/**
+ * The PlayGround is the view-controller of the site, all changes in state
+ * will propopgate from it, down.
+ * TODO: worry about how transitions will look/work
+ */
 var PlayGround = React.createClass({
-  render: function() {
-    return (
-      <div className="playGround">
-        <PlayTitlePane name="stars" />
-        <PlayView displayInfo={d} splitView={sizing} toggleMode={setSplitViewActive} onScriptHover={onScriptHover}/>
-      </div>
-    );
+  getInitialState: function() {
+    return getPlayState();
+  },
+  /**
+   * Event handler for 'change' events coming from the PlayStore
+   */
+   _onChange: function() {
+     this.setState(getPlayState());
+   },
+   componentDidMount: function() {
+     PlayStore.addChangeListener(this._onChange);
+   },
+   componentWillUnmount: function() {
+     PlayStore.removeChangeListener(this._onChange);
+   },
+   render: function() {
+     var value = null;
+     switch (this.state.viewMode){
+       case PlayConstants.PLAY_SPLIT_SCREEN:
+        value = (
+          <div className="playGround">
+            <PlayTitlePane name="stars" />
+            <PlayView displayInfo={this.state.scriptData}
+                      splitView={this.state.sizing}
+                      focusDisplayIndex={this.state.displayIndex}/>
+          </div>
+        );
+        break;
+       /**
+        * A particular display is being focused on, with its 'parameters' open to be changed.
+        * One can switch between the different displays.
+        */
+       case PlayConstants.PLAY_FOCUS_SCREEN:
+        <div>
+          <div className="innerContainer">
+            <PlayFocusView />
+          </div>
+        </div>
+        break;
+       case PlayConstants.PLAY_FULL_SCREEN:
+        <div>
+          <PlayFullView />
+        </div>
+        break;
+       default:
+        console.log(this.state.viewMode);
+        value = null;
+        //hopefully un-reachable
+     }
+
+    return value;
   }
 });
 //Width="250px" splitViewHeight="600px" splitView="true"

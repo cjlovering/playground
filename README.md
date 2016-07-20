@@ -28,10 +28,11 @@ I am currently using browserify to compile the app into a single file. If you wa
 git clone https://github.com/cjlovering/Playground.git
 ```
 ```node
-npm run install
+npm install
 ```
 ```node
 npm run build
 ```
 
-Open the app in your localhost!
+Open the app in your localhost! (If you don't have that set up, you can just click on
+the index.html in your GUI file navigator.)

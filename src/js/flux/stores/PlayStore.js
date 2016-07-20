@@ -78,6 +78,41 @@ function update(id, updates) {
 var PlayStore = assign({}, EventEmitter.prototype, {
 
   /**
+   * get the correct display module
+   * @return {object} the display module requested
+   */
+  getDisplayModule: function(index){
+    var Display;
+
+    switch(index){
+      case 0:
+        Display = require("./../../displays/PlayStars");
+        break;
+      case 1:
+        Display = require("./../../displays/PlayHubs");
+        break;
+      case 2:
+        Display = require("./../../displays/PlayHexLife");
+        break;
+      case 3:
+        Display = require("./../../displays/PlayGradients");
+        break;
+    }
+
+    return Display;
+  },
+
+  /**
+   *  gets the style name of the playView
+   *  @return {string}
+   */
+  getPlayViewStyleName: function(index){
+    return index == 0 ? "playViewLeftEdge" :
+                        index == 3 ? "playViewRightEdge" :
+                             "playView";
+  },
+
+  /**
    * Get the details on the displays
    * @return {object}
    */

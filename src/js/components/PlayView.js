@@ -1,11 +1,13 @@
 var React = require('react');
 
 var PlayPane = require('./PlayPane');
+var PlayActions = require('./../flux/actions/PlayActions');
 
 var PlayView = React.createClass({
   formPlayPane: function(di){
+    var focus = this.props.focusDisplayIndex == di.id ? true : false;
     return (
-      <PlayPane key={di.id} id={di.id} displayInfo={di} splitView={this.props.splitView} onScriptHover={this.props.onScriptHover}/>
+      <PlayPane focus={focus} key={di.id} id={di.id} displayInfo={di} splitView={this.props.splitView} />
     );
   },
   render: function() {

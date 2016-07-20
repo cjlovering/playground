@@ -1,6 +1,8 @@
 //react
 var React = require('react');
 var $     = require('jquery'); //installed with node
+var PlayDisplayAPI = require('./PlayDisplayAPI');
+
 
 //script variables
 var canvas, ctx;
@@ -244,10 +246,7 @@ var PlayHubs = React.createClass({
     }
   },
   render: function() {
-    var c = this.props.splitView == "false" ? false : <canvas id={this.props.displayInfo.canvasId} className="playViewCanvas" width={this.props.width} height={this.props.height}> </canvas>;
-    return (
-        c
-    );
+    return PlayDisplayAPI.renderDisplay(this.props);
   }
 });
 

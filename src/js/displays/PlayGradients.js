@@ -1,6 +1,8 @@
 //react
 var React = require('react');
 var $     = require('jquery'); //installed with node
+var PlayConstants = require('./../flux/constants/PlayConstants');
+var PlayDisplayAPI = require('./PlayDisplayAPI');
 
 /** ENUMS **/
 var RAND = {
@@ -24,16 +26,12 @@ var count = 0;
 var finish;
 
 /* prev ractive variables: gonna store em together for ease */
-var ractive = {
-  playing : true,
-  cover: true,
-  random : RAND.NORM,
-  boost : 26,
-  start : '0000FF',
-  end   : '88FF00',
-  increment: 0.10,
-  rate  : 1,
-  visible : false
+var tempProps = {
+  start: "0000FF",
+  end: "88FF00",
+  play: PlayConstants.PLAY_PLAY_FAST,
+  boost: 26,
+  increment: 0.10
 };
 
 //for now we're not gonna make the control box visible
@@ -45,31 +43,46 @@ var PlayGradients = React.createClass({
     if (canvas.getContext)
     {
       ctx = canvas.getContext('2d');
-      this.configureCanvas(ractive.start, ractive.end);
+      this.configureCanvas(tempProps.start, tempProps.end);
       configureColor();
       this.loop();
     } else console.log("Canvas context not found");
   },
   loop: function(){
-    if (this.props.play == "true")
-      requestAnimationFrame(this.loop);
+    switch (tempProps.play) {
+      case PlayConstants.PLAY_PLAY_FAST:
+        //normal continue
+        break;
+      case PlayConstants.PLAY_PLAY_FAST:
+        //slow continue
+        break;
+      case PlayConstants.PLAY_PLAY_STOP:
+        this.pause();
+        return;
+      case PlayConstants.PLAY_DELETE:
+        this.cleanUp();
+        this.deleteData();
+      default:
+        break;//hopefully doesn't happen
+    }
+    requestAnimationFrame(this.loop);
 
     //to start, we're just gonna let it run as fast as it can and see
     //gonna experiment keeping this boost factor vs not.
-    if (ractive.playing){ //
-      for(var i = 0; i < (ractive.boost < 20 ? ractive.boost : (ractive.boost * 25)); i++)
-      {
-          paint();
-          count += 1;
-          if (count >= finish){
-              //ctx.clearRect(0, 0, height, width);
-              randomColor();
-              this.configureCanvas();
-              count = 1;
-              break;
-          }
-      }
+
+    for(var i = 0; i < (tempProps.boost < 20 ? tempProps.boost : (tempProps.boost * 25)); i++)
+    {
+        paint();
+        count += 1;
+        if (count >= finish){
+            //ctx.clearRect(0, 0, height, width);
+            randomColor();
+            this.configureCanvas();
+            count = 1;
+            break;
+        }
     }
+
   },
   configureCanvas: function(){
     /*
@@ -121,10 +134,7 @@ var PlayGradients = React.createClass({
 
   },
   render: function() {
-    var c = this.props.splitView == "false" ? false : <canvas id={this.props.displayInfo.canvasId} className="playViewCanvas" width={this.props.width} height={this.props.height}> </canvas>;
-    return (
-        c
-    );
+    return PlayDisplayAPI.renderDisplay(this.props);
   }
 });
 
@@ -275,15 +285,15 @@ function nextColor()
     //to start we'll one at a time
     if (floor(cr) != er)
     {
-        cr += ractive.increment * shiftr;
+        cr += tempProps.increment * shiftr;
     }
     else if (floor(cg) != eg)
     {
-        cg += ractive.increment * shiftg;
+        cg += tempProps.increment * shiftg;
     }
     else if (floor(cb) != eb)
     {
-        cb += ractive.increment *  shiftb;
+        cb += tempProps.increment *  shiftb;
     }
     else
     {
@@ -327,8 +337,8 @@ function reverseColor()
 
 function configureColor()
 {
-    var s = parseInt(ractive.start,  16);
-    var e = parseInt(ractive.end, 16);
+    var s = parseInt(tempProps.start,  16);
+    var e = parseInt(tempProps.end, 16);
     //sr, sg, sb
     sr = (s >> 16) & 0xFF;
     sg = (s >> 8)  & 0xFF;
