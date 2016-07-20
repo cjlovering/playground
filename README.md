@@ -5,7 +5,7 @@ experiments, but also maintain performance. Furthermore, the platform is
 set up to be easily maintainable and support future growth.
 
 ## live!
-<https://github.com/cjlovering/playground>
+playground.vision
 
 ## current active displays
 * Stars
