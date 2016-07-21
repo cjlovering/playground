@@ -191,11 +191,9 @@ var PlayStars = React.createClass({
   },
   loop: function(){
     //if (this.props.play == "true")
-    if (rate > 0){
-      setTimeout(this.loop, rate);
-    } else {
-      requestAnimationFrame(this.loop);
-    }
+
+    requestAnimationFrame(this.loop);
+
     this.drawStars();
     if (seek && lagger > 0) lagger -= 10;
   },
@@ -221,27 +219,10 @@ var PlayStars = React.createClass({
     this.play();
   },
   componentWillUnmount: function(){
-    this.state.play = "false";
+    //this.state.play = "false";
   },
   render: function() {
-    switch (this.props.playMode) {
-      case PlayConstants.PLAY_PLAY_FAST:
-        //normal continue
-        rate = 0;
-        break;
-      case PlayConstants.PLAY_PLAY_SLOW:
-        rate = 30;
-        //slow continue
-        break;
-      case PlayConstants.PLAY_PLAY_STOP:
-        this.pause();
-        return;
-      case PlayConstants.PLAY_DELETE:
-        this.cleanUp();
-        this.deleteData();
-      default:
-        break;//hopefully doesn't happen
-    }
+
     return PlayDisplayAPI.renderDisplay(this.props);
   }
 });

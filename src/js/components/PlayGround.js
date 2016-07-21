@@ -3,6 +3,8 @@ var PlayStore = require('./../flux/stores/PlayStore');
 var PlayTitlePane = require('./PlayTitlePane');
 var PlayView = require('./PlayView');
 var PlayConstants = require('./../flux/constants/PlayConstants');
+var PlayPane = require('./PlayPane');
+
 
 /**
  * Retrieve the current data from the store
@@ -60,7 +62,8 @@ var PlayGround = React.createClass({
             <PlayTitlePane name="stars" />
             <PlayView displayInfo={this.state.scriptData}
                       splitView={this.state.sizing}
-                      focusDisplayIndex={this.state.displayIndex}/>
+                      focusDisplayIndex={this.state.displayIndex}
+                      viewMode={this.state.viewMode}/>
           </div>
         );
         break;
@@ -69,16 +72,24 @@ var PlayGround = React.createClass({
         * One can switch between the different displays.
         */
        case PlayConstants.PLAY_FOCUS_SCREEN:
-        <div>
-          <div className="innerContainer">
-            <PlayFocusView />
+        value = (
+         <div>
+            <div className="innerContainer">
+              <PlayFocusView />
+            </div>
           </div>
-        </div>
+        );
         break;
        case PlayConstants.PLAY_FULL_SCREEN:
-        <div>
-          <PlayFullView />
-        </div>
+        value = (
+          <div>
+            <PlayPane focus={true}
+                      id={this.state.displayIndex}
+                      displayInfo={this.state.scriptData[this.state.displayIndex]}
+                      splitView={this.state.sizing}
+                      viewMode={this.props.viewMode}/>
+          </div>
+        );
         break;
        default:
         console.log(this.state.viewMode);

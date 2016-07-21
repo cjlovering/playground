@@ -20,7 +20,7 @@ var PlayPane = React.createClass({
     var playMode = this.props.focus ? PlayConstants.PLAY_PLAY_FAST : PlayConstants.PLAY_PLAY_SLOW;
 
     return (
-      <div className={styleName} onMouseEnter={this._onMouseEnter}>
+      <div className={styleName} onMouseEnter={this._onMouseEnter} onDoubleClick={this._onDoubleClick}>
         <Display displayInfo={this.props.displayInfo}
                  height={this.props.splitView.height}
                  width={this.props.splitView.width}
@@ -28,6 +28,7 @@ var PlayPane = React.createClass({
                  id={this.props.id}
                  focus={focus}
                  playMode={playMode}
+                 viewMode={this.props.viewMode}
                  play="true"/>
 
         <PlayViewLabel focus={focus} name={this.props.displayInfo.name} description={this.props.displayInfo.text}/>
@@ -40,6 +41,13 @@ var PlayPane = React.createClass({
    */
   _onMouseEnter: function(){
     PlayActions.focusDisplayIndex(this.props.id);
+  },
+  /**
+   * go full view mode on this index. really the index
+   * isn't needed, but whatever for now. 
+   */
+  _onDoubleClick: function(){
+    PlayActions.goFullViewMode(this.props.id);
   }
 });
 

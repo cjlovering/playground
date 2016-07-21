@@ -128,6 +128,13 @@ var PlayStore = assign({}, EventEmitter.prototype, {
     return sizing;
   },
 
+  setSizingFull: function() {
+    sizing = {
+      height: window.innerHeight,
+      width: window.innerWidth
+    }
+  },
+
   /**
    * Get the index of the script being focused on
    * @return {number}
@@ -142,6 +149,10 @@ var PlayStore = assign({}, EventEmitter.prototype, {
    */
   getViewMode: function() {
     return viewMode;
+  },
+
+  setViewMode: function(m) {
+    viewMode = m;
   },
 
   emitChange: function() {
@@ -169,13 +180,20 @@ AppDispatcher.register(function(action) {
 
   switch(action.actionType) {
     case PlayConstants.PLAY_FOCUS_INDEX:
-      id = action.id;
+      let id = action.id;
       if (id !== displayIndex){
         setDisplayIndex(id);
         PlayStore.emitChange();
       }
       break;
-
+    case PlayConstants.PLAY_FULL_SCREEN:
+      if (action.actionType !== viewMode){
+        setDisplayIndex(action.id);
+        PlayStore.setSizingFull();
+        PlayStore.setViewMode(action.actionType);
+        PlayStore.emitChange();
+      }
+      break;
     default:
       // no op
   }

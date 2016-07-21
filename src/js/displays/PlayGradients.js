@@ -122,7 +122,7 @@ var PlayGradients = React.createClass({
 
   },
   render: function() {
-    //if (this.props.viewMode == PlayConstants.PLAY_SPLIT_SCREEN)
+    if (this.props.viewMode == PlayConstants.PLAY_SPLIT_SCREEN)
     switch (this.props.playMode) {
       case PlayConstants.PLAY_PLAY_FAST:
         //normal continue

@@ -11,6 +11,15 @@ var PlayActions = {
       actionType: PlayConstants.PLAY_FOCUS_INDEX,
       id: index
     });
+  },
+  /**
+   * @param  {number} index
+   */
+  goFullViewMode: function(index) {
+    AppDispatcher.dispatch({
+      actionType: PlayConstants.PLAY_FULL_SCREEN,
+      id: index
+    });
   }
 };
 

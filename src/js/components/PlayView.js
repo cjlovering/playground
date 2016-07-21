@@ -7,7 +7,12 @@ var PlayView = React.createClass({
   formPlayPane: function(di){
     var focus = this.props.focusDisplayIndex == di.id ? true : false;
     return (
-      <PlayPane focus={focus} key={di.id} id={di.id} displayInfo={di} splitView={this.props.splitView} />
+      <PlayPane focus={focus}
+                key={di.id}
+                id={di.id}
+                displayInfo={di}
+                splitView={this.props.splitView}
+                viewMode={this.props.viewMode}/>
     );
   },
   render: function() {
