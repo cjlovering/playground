@@ -3,7 +3,7 @@ var PlayStore = require('./../flux/stores/PlayStore');
 var PlayTitlePane = require('./PlayTitlePane');
 var PlayView = require('./PlayView');
 var PlayConstants = require('./../flux/constants/PlayConstants');
-var PlayPane = require('./PlayPane');
+var PlayFullView = require('./PlayFullView');
 
 
 /**
@@ -82,13 +82,11 @@ var PlayGround = React.createClass({
         break;
        case PlayConstants.PLAY_FULL_SCREEN:
         value = (
-          <div>
-            <PlayPane focus={true}
-                      id={this.state.displayIndex}
-                      displayInfo={this.state.scriptData[this.state.displayIndex]}
-                      splitView={this.state.sizing}
-                      viewMode={this.props.viewMode}/>
-          </div>
+          <PlayFullView focus={true}
+                        id={this.state.displayIndex}
+                        displayInfo={this.state.scriptData[this.state.displayIndex]}
+                        splitView={this.state.sizing}
+                        viewMode={this.props.viewMode}/>
         );
         break;
        default:

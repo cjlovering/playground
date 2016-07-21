@@ -20,6 +20,15 @@ var PlayActions = {
       actionType: PlayConstants.PLAY_FULL_SCREEN,
       id: index
     });
+  },
+  /**
+   * @param  {number} index
+   */
+  goSplitViewMode: function(index) {
+    AppDispatcher.dispatch({
+      actionType: PlayConstants.PLAY_SPLIT_SCREEN,
+      id: index
+    });
   }
 };
 

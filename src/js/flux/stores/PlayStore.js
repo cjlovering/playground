@@ -135,6 +135,13 @@ var PlayStore = assign({}, EventEmitter.prototype, {
     }
   },
 
+  setSizingSplit: function() {
+    sizing = {
+      width: ((window.innerWidth * (1.00 - (0.03 + 0.03 + 0.02)- (0.02 * ( d.length - 2)) )) / d.length) + "px",
+      height: (window.innerHeight * 0.80) + "px"
+    }
+  },
+
   /**
    * Get the index of the script being focused on
    * @return {number}
@@ -190,6 +197,14 @@ AppDispatcher.register(function(action) {
       if (action.actionType !== viewMode){
         setDisplayIndex(action.id);
         PlayStore.setSizingFull();
+        PlayStore.setViewMode(action.actionType);
+        PlayStore.emitChange();
+      }
+      break;
+    case PlayConstants.PLAY_SPLIT_SCREEN:
+      if (action.actionType !== viewMode){
+        setDisplayIndex(action.id);
+        PlayStore.setSizingSplit();
         PlayStore.setViewMode(action.actionType);
         PlayStore.emitChange();
       }
