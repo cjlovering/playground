@@ -7,7 +7,15 @@ var PlayConstants = require('./../flux/constants/PlayConstants');
 
 
 var PlayFullView = React.createClass({
-
+  getTitle: function() {
+    return this.state.title ?
+    (<div id="fullTitle" display="none" onMouseLeave={this._onMouseLeave}>
+      <h1> {this.props.displayInfo.name} </h1>
+    </div>) : null;
+  },
+  componentWillMount: function(){
+    this.setState({"title": false});
+  },
   render: function() {
     var Display = PlayStore.getDisplayModule(this.props.id);
     var styleName = PlayStore.getPlayViewStyleName(this.props.id);
@@ -25,9 +33,7 @@ var PlayFullView = React.createClass({
      */
     return (
       <div className={styleName} onMouseMove={this._onMouseMove} onDoubleClick={this._onDoubleClick}>
-        <div id="fullTitle" display="none" onMouseLeave={this._onMouseLeave}>
-          <h1> {this.props.displayInfo.name} </h1>
-        </div>
+        {this.getTitle}
         <Display displayInfo={this.props.displayInfo}
                  height={this.props.splitView.height}
                  width={this.props.splitView.width}
@@ -47,19 +53,20 @@ var PlayFullView = React.createClass({
    * if mouse moves in the top 15% of the page, pull down menu
    */
   _onMouseMove: function(e){
-    var y = e.y;
+    var y = e.target;
     var h = window.innerHeight;
-    if ( y < 0.15 * h) {
-      var title = $.getElementById("#fullTitle");
-      title.css("display", "true");
+    console.log(y);
+    console.log(y.y);
+    console.log(h*0.15);
+    if ( y.y < 0.15 * h) {
+        this.setState({"title": true});
     };
   },
   /**
    * if mouse moves in the top 15% of the page, pull down menu
    */
   _onMouseLeave: function(e){
-      var title = $.getElementById("#fullTitle");
-      title.css("display", "none");
+      this.setState({"title": false});
   },
 
   /**
