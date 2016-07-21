@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "browserify -t [ babelify --presets [ react ] ] src/js/app.js -o build/bundle.js",
-    "release": "browserify src/js/app.js -t envify --NODE_ENV production  | uglifyjs -cm > build/bundle.js"
+    "release": "browserify src/js/app.js -t envify --NODE_ENV production  | uglifyjs -mc warnings=false > build/bundle.js"
   },
   "repository": {
     "type": "git",

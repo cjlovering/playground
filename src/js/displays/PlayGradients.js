@@ -29,10 +29,10 @@ var finish;
 var tempProps = {
   start: "0000FF",
   end: "88FF00",
-  play: PlayConstants.PLAY_PLAY_FAST,
+  play: PlayConstants.PLAY_PLAY_SLOW,
   boost: 26,
   increment: 0.10,
-  time: -1
+  time: 100
 };
 
 //for now we're not gonna make the control box visible
@@ -51,13 +51,15 @@ var PlayGradients = React.createClass({
   },
   loop: function(){
 
-    switch (tempProps.play) {
+    switch (this.props.playMode) {
       case PlayConstants.PLAY_PLAY_FAST:
         //normal continue
+        tempProps.boost = 26;
+        tempProps.time  = 0;
         break;
       case PlayConstants.PLAY_PLAY_SLOW:
-        this.tempProps.boost = 15;
-        this.tempProps.time  = 50;
+        tempProps.boost = 15;
+        tempProps.time  = 50;
         //slow continue
         break;
       case PlayConstants.PLAY_PLAY_STOP:
@@ -89,7 +91,7 @@ var PlayGradients = React.createClass({
     }
 
     if (tempProps.time > 0){
-      setTimeout(requestAnimationFrame(this.loop), this.tempProps.time);
+      setTimeout(this.loop, tempProps.time);
     } else {
       requestAnimationFrame(this.loop);
     }
