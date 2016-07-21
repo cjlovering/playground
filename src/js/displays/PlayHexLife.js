@@ -2,6 +2,7 @@
 var React = require('react');
 var $     = require('jquery'); //installed with node
 var PlayDisplayAPI = require('./PlayDisplayAPI');
+var PlayConstants = require('./../flux/constants/PlayConstants');
 
 //script variables
 var Rules, SetA, SetB, SetC;
@@ -341,10 +342,6 @@ var PlayHexLife = React.createClass({
         loop();
     }
   },
-
-
-
-
     //react life cycle:
     componentDidMount: function(){
       this.play();
@@ -353,6 +350,28 @@ var PlayHexLife = React.createClass({
 
     },
     render: function() {
+      //TODO: move this out of render -> should be in
+      //some component's props might change etc.
+      switch (this.props.playMode) {
+        case PlayConstants.PLAY_PLAY_FAST:
+          //normal continue
+          rate = 250;
+          break;
+        case PlayConstants.PLAY_PLAY_SLOW:
+          rate = 1000;
+          //slow continue
+          break;
+        case PlayConstants.PLAY_PLAY_STOP:
+          rate = 0;
+          //this.pause();
+          return;
+        case PlayConstants.PLAY_DELETE:
+          this.cleanUp();
+          this.deleteData();
+        default:
+          break;//hopefully doesn't happen
+      }
+
       return PlayDisplayAPI.renderDisplay(this.props);
     }
 });

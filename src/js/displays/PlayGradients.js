@@ -50,30 +50,6 @@ var PlayGradients = React.createClass({
     } else console.log("Canvas context not found");
   },
   loop: function(){
-
-    switch (this.props.playMode) {
-      case PlayConstants.PLAY_PLAY_FAST:
-        //normal continue
-        tempProps.boost = 26;
-        tempProps.time  = 0;
-        break;
-      case PlayConstants.PLAY_PLAY_SLOW:
-        tempProps.boost = 15;
-        tempProps.time  = 50;
-        //slow continue
-        break;
-      case PlayConstants.PLAY_PLAY_STOP:
-        this.pause();
-        return;
-      case PlayConstants.PLAY_DELETE:
-        this.cleanUp();
-        this.deleteData();
-      default:
-        break;//hopefully doesn't happen
-    }
-
-
-
     //to start, we're just gonna let it run as fast as it can and see
     //gonna experiment keeping this boost factor vs not.
 
@@ -146,6 +122,27 @@ var PlayGradients = React.createClass({
 
   },
   render: function() {
+    //if (this.props.viewMode == PlayConstants.PLAY_SPLIT_SCREEN)
+    switch (this.props.playMode) {
+      case PlayConstants.PLAY_PLAY_FAST:
+        //normal continue
+        tempProps.boost = 26;
+        tempProps.time  = 0;
+        break;
+      case PlayConstants.PLAY_PLAY_SLOW:
+        tempProps.boost = 15;
+        tempProps.time  = 50;
+        //slow continue
+        break;
+      case PlayConstants.PLAY_PLAY_STOP:
+        this.pause();
+        return;
+      case PlayConstants.PLAY_DELETE:
+        this.cleanUp();
+        this.deleteData();
+      default:
+        break;//hopefully doesn't happen
+    }
     return PlayDisplayAPI.renderDisplay(this.props);
   }
 });

@@ -2,7 +2,7 @@
 var React = require('react');
 var $     = require('jquery'); //installed with node
 var PlayDisplayAPI = require('./PlayDisplayAPI');
-
+var PlayConstants = require('./../flux/constants/PlayConstants');
 
 //script variables
 var canvas, ctx;
@@ -160,8 +160,7 @@ var PlayHubs = React.createClass({
       this.loop();
   },
   loop: function(){
-    if (this.props.play == "true")
-      requestAnimationFrame(this.loop);
+    requestAnimationFrame(this.loop);
 
     ANGLE = Math.PI / data.angle;
 
@@ -171,9 +170,10 @@ var PlayHubs = React.createClass({
 		var l = data.star_num;
 		var ll = stars.length;
 
-	  if (l > ll)      this.createStars(l - ll);
-		else if (ll > l) this.reduceStars (ll - l);
-
+	  //if (l > ll)      this.createStars(l - ll);
+		//else if (ll > l) this.reduceStars (ll - l);
+    if (l > ll)      this.createStars(1);
+    else if (ll > l) this.reduceStars (1);
 		// phase 1: move stars
 		this.moveStars();
 
@@ -246,6 +246,30 @@ var PlayHubs = React.createClass({
     }
   },
   render: function() {
+    //if (this.props.viewMode == PlayConstants.PLAY_SPLIT_SCREEN)
+    switch (this.props.playMode) {
+      case PlayConstants.PLAY_PLAY_FAST:
+        //normal continue
+        data.threshold = 0.22;
+        //data.rate = 5;
+        data.star_num = 40;
+        break;
+      case PlayConstants.PLAY_PLAY_SLOW:
+        data.threshold = 0.15;
+        //data.rate = 20;
+        data.star_num = 20;
+        //slow continue
+        break;
+      case PlayConstants.PLAY_PLAY_STOP:
+        this.pause();
+        return;
+      case PlayConstants.PLAY_DELETE:
+        this.cleanUp();
+        this.deleteData();
+      default:
+        break;//hopefully doesn't happen
+    }
+
     return PlayDisplayAPI.renderDisplay(this.props);
   }
 });
