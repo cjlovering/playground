@@ -1,5 +1,5 @@
 var React = require('react');
-
+var $ = require('jQuery');
 var PlayViewLabel = require('./PlayViewLabel');
 var PlayActions = require('./../flux/actions/PlayActions');
 var PlayStore = require('./../flux/stores/PlayStore');
@@ -18,12 +18,16 @@ var PlayFullView = React.createClass({
      */
     var focus = this.props.focus ? " focused" : " unfocused";
 
+
     /**
      *  TODO: going to have to change it later, so when switching from
      *  focus to full, you keep the same settings
      */
     return (
-      <div className={styleName} onMouseEnter={this._onMouseEnter} onDoubleClick={this._onDoubleClick}>
+      <div className={styleName} onMouseMove={this._onMouseMove} onDoubleClick={this._onDoubleClick}>
+        <div id="fullTitle" display="none" onMouseLeave={this._onMouseLeave}>
+          <h1> {this.props.displayInfo.name} </h1>
+        </div>
         <Display displayInfo={this.props.displayInfo}
                  height={this.props.splitView.height}
                  width={this.props.splitView.width}
@@ -37,20 +41,29 @@ var PlayFullView = React.createClass({
     );
   },
 
+
+
   /**
    * if mouse moves in the top 15% of the page, pull down menu
    */
   _onMouseMove: function(e){
-    /*
-    var x = e.event.x;
-    var y = e.event.y;
-
-    PlayActions.focusDisplayIndex(this.props.id);
-    */
+    var y = e.y;
+    var h = window.innerHeight;
+    if ( y < 0.15 * h) {
+      var title = $.getElementById("#fullTitle");
+      title.css("display", "true");
+    };
   },
   /**
-   * go full view mode on this index. really the index
-   * isn't needed, but whatever for now.
+   * if mouse moves in the top 15% of the page, pull down menu
+   */
+  _onMouseLeave: function(e){
+      var title = $.getElementById("#fullTitle");
+      title.css("display", "none");
+  },
+
+  /**
+   * go back to sp
    */
   _onDoubleClick: function(){
     PlayActions.goSplitViewMode(this.props.id);
