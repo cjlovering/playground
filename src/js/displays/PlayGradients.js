@@ -31,7 +31,8 @@ var tempProps = {
   end: "88FF00",
   play: PlayConstants.PLAY_PLAY_FAST,
   boost: 26,
-  increment: 0.10
+  increment: 0.10,
+  time: -1
 };
 
 //for now we're not gonna make the control box visible
@@ -49,11 +50,14 @@ var PlayGradients = React.createClass({
     } else console.log("Canvas context not found");
   },
   loop: function(){
+
     switch (tempProps.play) {
       case PlayConstants.PLAY_PLAY_FAST:
         //normal continue
         break;
-      case PlayConstants.PLAY_PLAY_FAST:
+      case PlayConstants.PLAY_PLAY_SLOW:
+        this.tempProps.boost = 15;
+        this.tempProps.time  = 50;
         //slow continue
         break;
       case PlayConstants.PLAY_PLAY_STOP:
@@ -65,7 +69,8 @@ var PlayGradients = React.createClass({
       default:
         break;//hopefully doesn't happen
     }
-    requestAnimationFrame(this.loop);
+
+
 
     //to start, we're just gonna let it run as fast as it can and see
     //gonna experiment keeping this boost factor vs not.
@@ -83,6 +88,11 @@ var PlayGradients = React.createClass({
         }
     }
 
+    if (tempProps.time > 0){
+      setTimeout(requestAnimationFrame(this.loop), this.tempProps.time);
+    } else {
+      requestAnimationFrame(this.loop);
+    }
   },
   configureCanvas: function(){
     /*

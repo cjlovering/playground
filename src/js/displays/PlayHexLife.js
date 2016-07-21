@@ -49,7 +49,6 @@ function Hexagon(x,y) {
 
         var test, n = 0;
 
-
         if(this.y%2 == 0){
 
             test = [[0, -1], [1, -1], [1, 0], [ 0, 1], [ -1, 0], [-1, 1], [-1, -1]]; //[0, 0 ],
@@ -188,25 +187,7 @@ function populateCellArray(){
         for ( var j = 0; j < boardHeight; j++)
             cells[i][j] = new Hexagon(i,j);
 }
-function loop(){
 
-    setTimeout(function(){
-
-        requestAnimationFrame(loop);
-
-        for ( var i = 0; i < boardWidth; i++)
-
-        for ( var j = 0; j < boardHeight; j++){
-            cells[i][j].Play();
-        }
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawBoard(ctx, boardWidth, boardHeight);
-
-        //loop();
-
-    }, rate)
-}
 
 function onResizeDraw(){
 
@@ -303,6 +284,21 @@ function configureHexagonParameters(){
     hexRectangleWidth = 2 * hexRadius;
 }
 
+function loop(){
+    setTimeout(function() {
+        requestAnimationFrame(loop);
+        // Drawing code goes here
+        for ( var i = 0; i < boardWidth; i++)
+          for ( var j = 0; j < boardHeight; j++){
+            cells[i][j].Play();
+          }
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawBoard(ctx, boardWidth, boardHeight);
+
+    }, rate);
+}
+
 var PlayHexLife = React.createClass({
   play: function(){
     canvas = document.getElementById('hexMap');
@@ -345,6 +341,10 @@ var PlayHexLife = React.createClass({
         loop();
     }
   },
+
+
+
+
     //react life cycle:
     componentDidMount: function(){
       this.play();
