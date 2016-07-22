@@ -20,7 +20,10 @@ var PlayPane = React.createClass({
     var playMode = this.props.focus ? PlayConstants.PLAY_PLAY_FAST : PlayConstants.PLAY_PLAY_SLOW;
 
     return (
-      <div className={styleName} onMouseEnter={this._onMouseEnter} onDoubleClick={this._onDoubleClick}>
+      <div className={styleName}
+           onMouseEnter={this._onMouseEnter}
+           onMouseLeave={this._onMouseLeave}
+           onDoubleClick={this._onDoubleClick}>
         <Display displayInfo={this.props.displayInfo}
                  height={this.props.splitView.height}
                  width={this.props.splitView.width}
@@ -43,8 +46,14 @@ var PlayPane = React.createClass({
     PlayActions.focusDisplayIndex(this.props.id);
   },
   /**
+   * remove focus on leave for responsive feel
+   */
+  _onMouseLeave: function(){
+    PlayActions.focusDisplayIndex(-1);
+  },
+  /**
    * go full view mode on this index. really the index
-   * isn't needed, but whatever for now. 
+   * isn't needed, but whatever for now.
    */
   _onDoubleClick: function(){
     PlayActions.goFullViewMode(this.props.id);
