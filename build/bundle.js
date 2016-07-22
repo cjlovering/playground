@@ -31175,19 +31175,6 @@ var PlayConstants = require('./../flux/constants/PlayConstants');
 var PlayFullView = React.createClass({
   displayName: 'PlayFullView',
 
-  getTitle: function () {
-    return this.state.title ? React.createElement(
-      'div',
-      { id: 'fullTitle', display: 'none', onMouseLeave: this._onMouseLeave },
-      React.createElement(
-        'h1',
-        null,
-        ' ',
-        this.props.displayInfo.name,
-        ' '
-      )
-    ) : null;
-  },
   componentWillMount: function () {
     this.setState({ "title": false });
   },
@@ -31201,6 +31188,21 @@ var PlayFullView = React.createClass({
      */
     var focus = this.props.focus ? " focused" : " unfocused";
 
+    var title = this.state.title ? React.createElement(
+      'div',
+      { id: 'fullTitle', display: 'none' },
+      React.createElement(
+        'h1',
+        { className: 'banner' },
+        ' playground: ',
+        React.createElement(
+          'span',
+          { className: 'sub-banner' },
+          this.props.displayInfo.name
+        )
+      )
+    ) : null;
+
     /**
      *  TODO: going to have to change it later, so when switching from
      *  focus to full, you keep the same settings
@@ -31208,7 +31210,7 @@ var PlayFullView = React.createClass({
     return React.createElement(
       'div',
       { className: styleName, onMouseMove: this._onMouseMove, onDoubleClick: this._onDoubleClick },
-      this.getTitle,
+      title,
       React.createElement(Display, { displayInfo: this.props.displayInfo,
         height: this.props.splitView.height,
         width: this.props.splitView.width,
@@ -31225,20 +31227,13 @@ var PlayFullView = React.createClass({
    * if mouse moves in the top 15% of the page, pull down menu
    */
   _onMouseMove: function (e) {
-    var y = e.target;
+    var y = e.nativeEvent.y;
     var h = window.innerHeight;
-    console.log(y);
-    console.log(y.y);
-    console.log(h * 0.15);
-    if (y.y < 0.15 * h) {
+    if (y < 0.20 * h) {
       this.setState({ "title": true });
-    };
-  },
-  /**
-   * if mouse moves in the top 15% of the page, pull down menu
-   */
-  _onMouseLeave: function (e) {
-    this.setState({ "title": false });
+    } else if (y > 0.23 * h) {
+      this.setState({ "title": false });
+    }
   },
 
   /**
@@ -31637,6 +31632,7 @@ var PlayGradients = React.createClass({
     },
     //react life cycle:
     componentDidMount: function () {
+        finish = window.innerHeight * window.innerWidth;
         this.play();
     },
     componentWillUnmount: function () {},
@@ -32856,22 +32852,22 @@ var CHANGE_EVENT = 'change';
  */
 var d = [{
   "id": 0,
-  "name": "PlayStars",
+  "name": "stars",
   "canvasId": "starZone",
   "text": "Smooth interactive system of stars."
 }, {
   "id": 1,
-  "name": "PlayHubs",
+  "name": "hubs",
   "canvasId": "hubWay",
   "text": "Set of hubs interconnected and moving."
 }, {
   "id": 2,
-  "name": "PlayHexLife",
+  "name": "hexlife",
   "canvasId": "hexMap",
   "text": "Game of life on a hexagonal grid"
 }, {
   "id": 3,
-  "name": "PlayGradients",
+  "name": "gradients",
   "canvasId": "pixelMap",
   "text": "A continuous stream of gradients covering a canvas between random colors."
 }];

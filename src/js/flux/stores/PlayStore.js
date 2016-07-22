@@ -15,25 +15,25 @@ var CHANGE_EVENT = 'change';
  var d = [
      {
          "id": 0,
-         "name": "PlayStars",
+         "name": "stars",
          "canvasId": "starZone",
          "text": "Smooth interactive system of stars."
      },
      {
          "id": 1,
-         "name": "PlayHubs",
+         "name": "hubs",
          "canvasId": "hubWay",
          "text": "Set of hubs interconnected and moving."
      },
      {
          "id": 2,
-         "name": "PlayHexLife",
+         "name": "hexlife",
          "canvasId": "hexMap",
          "text": "Game of life on a hexagonal grid"
      },
      {
          "id": 3,
-         "name": "PlayGradients",
+         "name": "gradients",
          "canvasId": "pixelMap",
          "text": "A continuous stream of gradients covering a canvas between random colors."
      }

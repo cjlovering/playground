@@ -7,12 +7,6 @@ var PlayConstants = require('./../flux/constants/PlayConstants');
 
 
 var PlayFullView = React.createClass({
-  getTitle: function() {
-    return this.state.title ?
-    (<div id="fullTitle" display="none" onMouseLeave={this._onMouseLeave}>
-      <h1> {this.props.displayInfo.name} </h1>
-    </div>) : null;
-  },
   componentWillMount: function(){
     this.setState({"title": false});
   },
@@ -26,6 +20,10 @@ var PlayFullView = React.createClass({
      */
     var focus = this.props.focus ? " focused" : " unfocused";
 
+    var title = this.state.title ? <div id="fullTitle" display="none">
+      <h1 className="banner"> playground: <span className="sub-banner">{this.props.displayInfo.name}</span></h1>
+    </div> : null;
+
 
     /**
      *  TODO: going to have to change it later, so when switching from
@@ -33,7 +31,7 @@ var PlayFullView = React.createClass({
      */
     return (
       <div className={styleName} onMouseMove={this._onMouseMove} onDoubleClick={this._onDoubleClick}>
-        {this.getTitle}
+        {title}
         <Display displayInfo={this.props.displayInfo}
                  height={this.props.splitView.height}
                  width={this.props.splitView.width}
@@ -53,20 +51,13 @@ var PlayFullView = React.createClass({
    * if mouse moves in the top 15% of the page, pull down menu
    */
   _onMouseMove: function(e){
-    var y = e.target;
+    var y = e.nativeEvent.y;
     var h = window.innerHeight;
-    console.log(y);
-    console.log(y.y);
-    console.log(h*0.15);
-    if ( y.y < 0.15 * h) {
-        this.setState({"title": true});
-    };
-  },
-  /**
-   * if mouse moves in the top 15% of the page, pull down menu
-   */
-  _onMouseLeave: function(e){
+    if ( y < 0.20 * h) {
+      this.setState({"title": true});
+    } else if ( y > 0.23 * h) {
       this.setState({"title": false});
+    }
   },
 
   /**
