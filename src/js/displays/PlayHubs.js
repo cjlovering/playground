@@ -150,7 +150,6 @@ var PlayHubs = React.createClass({
       //this.configureCanvas();
 
       //create all the stars, pseudo randomly
-      this.createStars(data.star_num);
       // phase 1: draw hubs
       this.drawStars();
       // phase 2: draw edges
@@ -203,7 +202,11 @@ var PlayHubs = React.createClass({
     for (var i = 0; i < x; i++) stars.pop();
   },
   componentDidMount: function(){
+    //this.createStars(data.star_num);
     this.play();
+  },
+  componentWillUnmount: function(){
+    stars.length = 0;
   },
   onResizeDraw: function() {
     this.configureCanvas();
@@ -246,13 +249,18 @@ var PlayHubs = React.createClass({
     }
   },
   render: function() {
-    //if (this.props.viewMode == PlayConstants.PLAY_SPLIT_SCREEN)
+
+    if (this.props.viewMode == PlayConstants.PLAY_FULL_SCREEN){
+      data.threshold = 0.15;
+      data.star_num = 30;
+    }
+    else if (this.props.viewMode == PlayConstants.PLAY_SPLIT_SCREEN)
     switch (this.props.playMode) {
       case PlayConstants.PLAY_PLAY_FAST:
         //normal continue
-        data.threshold = 0.22;
+        data.threshold = 0.20;
         //data.rate = 5;
-        data.star_num = 40;
+        data.star_num = 20;
         break;
       case PlayConstants.PLAY_PLAY_SLOW:
         data.threshold = 0.15;
