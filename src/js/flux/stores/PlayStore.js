@@ -41,7 +41,7 @@ var CHANGE_EVENT = 'change';
 
  var sizing = {
    width: ((window.innerWidth * (1.00 - (0.03 + 0.03 + 0.02)- (0.02 * ( d.length - 2)) )) / d.length) + "px",
-   height: (window.innerHeight * 0.80) + "px"
+   height: (window.innerHeight * 0.84) + "px"
  }
 
 
@@ -138,7 +138,7 @@ var PlayStore = assign({}, EventEmitter.prototype, {
   setSizingSplit: function() {
     sizing = {
       width: ((window.innerWidth * (1.00 - (0.03 + 0.03 + 0.02)- (0.02 * ( d.length - 2)) )) / d.length) + "px",
-      height: (window.innerHeight * 0.80) + "px"
+      height: (window.innerHeight * 0.84) + "px"
     }
   },
 

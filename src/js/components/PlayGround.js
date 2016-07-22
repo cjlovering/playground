@@ -64,6 +64,11 @@ var PlayGround = React.createClass({
                       splitView={this.state.sizing}
                       focusDisplayIndex={this.state.displayIndex}
                       viewMode={this.state.viewMode}/>
+            <div className="noteSplitDiv" >
+              <h3 className="noteSplitH">
+                double  click on a display to full screen it
+              </h3>
+            </div>
           </div>
         );
         break;

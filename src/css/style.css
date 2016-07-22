@@ -113,6 +113,17 @@ span.subFullTitleBannerH {
   font-size: 1.5em;
   border-bottom: none;
 }
+.noteSplitDiv {
+  width: 40%;
+  left: 30%;
+  bottom: 0;
+  position: fixed;
+}
+.noteSplitH {
+  text-align: center;
+  font-size: 0.8em;
+  border-bottom: none;
+}
 h3 {
   font-size: 1.5em;
 }
