@@ -4,7 +4,7 @@ var PlayViewLabel = require('./PlayViewLabel');
 var PlayActions = require('./../flux/actions/PlayActions');
 var PlayStore = require('./../flux/stores/PlayStore');
 var PlayConstants = require('./../flux/constants/PlayConstants');
-
+var ReactCSSTransitionGroup = require('react-addons-css-transition-group');
 
 var PlayFullView = React.createClass({
   componentWillMount: function(){
@@ -31,7 +31,14 @@ var PlayFullView = React.createClass({
      */
     return (
       <div className={styleName} onMouseMove={this._onMouseMove} onDoubleClick={this._onDoubleClick}>
+      <ReactCSSTransitionGroup
+               transitionName="banner"
+               transitionEnterTimeout={550}
+               transitionLeaveTimeout={550}
+             >
         {title}
+        </ReactCSSTransitionGroup>
+
         <Display displayInfo={this.props.displayInfo}
                  height={this.props.splitView.height}
                  width={this.props.splitView.width}

@@ -117,10 +117,11 @@ var PlayGradients = React.createClass({
   //react life cycle:
   componentDidMount: function(){
     finish = window.innerHeight * window.innerWidth;
+    count = 0;
     this.play();
   },
   componentWillUnmount: function(){
-    
+
   },
   render: function() {
     if (this.props.viewMode == PlayConstants.PLAY_SPLIT_SCREEN)
