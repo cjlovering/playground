@@ -32350,7 +32350,6 @@ var RAND = {
 var canvas, ctx;
 var pixels;
 var width, height;
-var count = 0;
 var xposition, yposition;
 var ffx, ffy;
 var tx, ty;
@@ -32394,6 +32393,9 @@ var PlayGradients = React.createClass({
             count += 1;
             if (count >= finish) {
                 //ctx.clearRect(0, 0, height, width);
+                //console.log("count:", count);
+                //console.log("finish:", finish);
+
                 randomColor();
                 this.configureCanvas();
                 count = 1;
@@ -32451,6 +32453,7 @@ var PlayGradients = React.createClass({
     //react life cycle:
     componentDidMount: function () {
         finish = window.innerHeight * window.innerWidth;
+        count = 0;
         this.play();
     },
     componentWillUnmount: function () {},
