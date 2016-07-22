@@ -9,6 +9,7 @@ var ReactCSSTransitionGroup = require('react-addons-css-transition-group');
 var PlayFullView = React.createClass({
   componentWillMount: function(){
     this.setState({"title": false});
+    this.setState({"note": false});
   },
   render: function() {
     var Display = PlayStore.getDisplayModule(this.props.id);
@@ -20,10 +21,14 @@ var PlayFullView = React.createClass({
      */
     var focus = this.props.focus ? " focused" : " unfocused";
 
-    var title = this.state.title ? <div id="fullTitle" display="none">
-      <h1 className="banner"> playground: <span className="sub-banner">{this.props.displayInfo.name}</span></h1>
+    var title = this.state.title ? <div className="fullTitleBannerDiv" display="none">
+      <h1 className="fullTitleBannerH"> playground: <span className="subFullTitleBannerH">{this.props.displayInfo.name}</span></h1>
     </div> : null;
 
+    var note = this.state.note ?
+                  <div className="noteBannerDiv" key="2">
+                    <h3 className="noteBannerH"> double click to see all displays</h3>
+                  </div> : null;
 
     /**
      *  TODO: going to have to change it later, so when switching from
@@ -48,7 +53,16 @@ var PlayFullView = React.createClass({
                  playMode={PlayConstants.PLAY_PLAY_FAST}
                  viewMode={PlayConstants.PLAY_FULL_SCREEN}
                  play="true"/>
+                 <ReactCSSTransitionGroup
+                          transitionName="noteTransition"
+                          transitionEnterTimeout={550}
+                          transitionLeaveTimeout={550}
+                        >
+                   {note}
+                   </ReactCSSTransitionGroup>
       </div>
+
+
     );
   },
 
@@ -60,10 +74,16 @@ var PlayFullView = React.createClass({
   _onMouseMove: function(e){
     var y = e.nativeEvent.y;
     var h = window.innerHeight;
-    if ( y < 0.20 * h) {
+
+    if ((!this.state.title)&&(y < 0.20 * h)) {
       this.setState({"title": true});
-    } else if ( y > 0.23 * h) {
+      this.setState({"note": false});
+    } else if ((this.state.title || this.state.note)&&(y > 0.20 * h && y < 0.77 * h )) {
       this.setState({"title": false});
+      this.setState({"note": false});
+    }  else if ((!this.state.note)&&( y > 0.77 * h )) {
+      this.setState({"title": false});
+      this.setState({"note": true});
     }
   },
 

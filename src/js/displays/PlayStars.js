@@ -13,6 +13,7 @@ var target; //move towards target
 var seek = true;     //move away from
 var lagger = 0;
 var rate = 0;
+var colorIndex = 0;
 
 //*** api
 
@@ -38,7 +39,7 @@ function Star(i){
     this.y = Math.floor((Math.random() * canvas.height) + 1);
     this.lag = Math.random() < 0.8 ? Math.floor((Math.random() * 13) + 2) : ( Math.random() * 48 + 2 );//Math.floor((Math.random() * 48) + 2);
     this.r = 5;
-    this.color = getColor(i);
+    this.color = getColor();
     this.t;
     this.i = 1;
     this.t = {x: Math.floor((Math.random() * canvas.width) + 1), y: Math.floor((Math.random() * canvas.height) + 1)};
@@ -53,6 +54,7 @@ function Star(i){
             this.r =  Math.floor ( 25 * ratio ) + 1;
         }
 
+        //going towards mouse
         if (seek){
 
             if (this.i == 0){
@@ -66,9 +68,9 @@ function Star(i){
 
             } else {
 
-                this.x += (target.x - this.x) * .5 / (this.r + this.lag + lagger);
-                this.y += (target.y - this.y) * .5 / (this.r + this.lag + lagger);
-
+                //.5 -> .6
+                this.x += (target.x - this.x) * 0.6 / (this.r + this.lag + lagger);
+                this.y += (target.y - this.y) * 0.6 / (this.r + this.lag + lagger);
 
                 if (Math.abs(target.x - this.x) < 3 && Math.abs(target.y - this.y) < 3){
                     this.i = 0;
@@ -76,6 +78,7 @@ function Star(i){
 
             }
 
+        //going out explode!
         } else {
 
             var xx = (target.x - this.x);
@@ -89,16 +92,17 @@ function Star(i){
                 var ratio = (Math.sqrt( square(this.t.x - this.x) + square(this.t.y - this.y) ) / (canvas.width));
                 this.r =  Math.floor ( 25 * ratio ) + 1;
 
-                this.x += (this.t.x - this.x) * .5 / (this.r + this.lag);
-                this.y += (this.t.y - this.y) * .5 / (this.r + this.lag);
+                this.x += (this.t.x - this.x) * 0.5 / (this.r + this.lag);
+                this.y += (this.t.y - this.y) * 0.5 / (this.r + this.lag);
 
 
             } else {
 
                 this.t = {x: Math.floor((Math.random() * canvas.width) + 1), y: Math.floor((Math.random() * canvas.height) + 1)};
 
-                this.x += 4 * xx;
-                this.y += 4 * yy;
+                //4 -> 0.5
+                this.x += 0.5 * xx;
+                this.y += 0.5 * yy;
 
             }
 
@@ -120,10 +124,11 @@ function Star(i){
     }
 };
 
-function getColor(n){
+function getColor(){
   var colors    = [ "#ccff66", "#FFD700","#66ccff", "#ff6fcf", "#ff6666", "#F70000", "#D1FF36", "#7FFF00", "#72E6DA", "#1FE3C7", "#4DF8FF", "#0276FD", "#FF00FF"];
-  n %= colors.length;
-  return colors[n];
+  var z = colorIndex % colors.length;
+  colorIndex += 1;
+  return colors[z];
 };
 
 function square(i){
@@ -146,7 +151,7 @@ var PlayStars = React.createClass({
             //default is congregate in the middle
             target = {x: Math.floor(0.5 * canvas.width + 1), y: Math.floor(0.5 * canvas.height + 1)};
 
-            this.createStars();
+            this.createStars(star_num);
 
             this.drawStars();
 
@@ -185,17 +190,28 @@ var PlayStars = React.createClass({
             this.loop();
         }
   },
-  createStars: function(){
-    for ( var i = 0; i < star_num; i++)
+  createStars: function(x){
+    for ( var i = 0; i < x; i++)
       stars.push( new Star(i) );
   },
   loop: function(){
     //if (this.props.play == "true")
 
+    var l = star_num;
+    var ll = stars.length;
+
+    //if (l > ll)      this.createStars(l - ll);
+    //else if (ll > l) this.reduceStars (ll - l);
+    if (l > ll)      this.createStars(1);
+    else if (ll > l) this.reduceStars (1);
+
     requestAnimationFrame(this.loop);
 
     this.drawStars();
     if (seek && lagger > 0) lagger -= 10;
+  },
+  reduceStars: function(x){
+    for (var i = 0; i < x; i++) stars.pop();
   },
   drawStars: function() {
       ctx = canvas.getContext('2d');
@@ -211,7 +227,7 @@ var PlayStars = React.createClass({
       this.drawStars();
   },
   configureCavas: function(w, h){
-      canvas.width = w;
+        canvas.width = w;
       canvas.height = h;
   },
   //react life cycle:
@@ -222,7 +238,27 @@ var PlayStars = React.createClass({
     //this.state.play = "false";
   },
   render: function() {
-
+    if (this.props.viewMode == PlayConstants.PLAY_FULL_SCREEN){
+      star_num = 175;
+    } else if (this.props.viewMode == PlayConstants.PLAY_SPLIT_SCREEN)
+    switch (this.props.playMode) {
+      case PlayConstants.PLAY_PLAY_FAST:
+        //normal continue
+        star_num = 50;
+        break;
+      case PlayConstants.PLAY_PLAY_SLOW:
+        star_num = 25;
+        //slow continue
+        break;
+      case PlayConstants.PLAY_PLAY_STOP:
+        this.pause();
+        return;
+      case PlayConstants.PLAY_DELETE:
+        this.cleanUp();
+        this.deleteData();
+      default:
+        break;//hopefully doesn't happen
+    }
     return PlayDisplayAPI.renderDisplay(this.props);
   }
 });
