@@ -39,10 +39,18 @@ var CHANGE_EVENT = 'change';
      }
  ];
 
+ function setSizingSplit(){
+    sizing = {
+      width: ((window.innerWidth * (1.00 - (0.03 + 0.03 + 0.02)- (0.02 * ( d.length - 2)) )) / d.length) + "px",
+      height: (window.innerHeight * 0.81) + "px"
+    }
+  };
+
  var sizing = {
-   width: ((window.innerWidth * (1.00 - (0.03 + 0.03 + 0.02)- (0.02 * ( d.length - 2)) )) / d.length) + "px",
-   height: (window.innerHeight * 0.84) + "px"
- }
+     width: ((window.innerWidth * (1.00 - (0.03 + 0.03 + 0.02)- (0.02 * ( d.length - 2)) )) / d.length) + "px",
+     height: (window.innerHeight * 0.81) + "px"
+   };
+
 
 
 /**
@@ -135,12 +143,7 @@ var PlayStore = assign({}, EventEmitter.prototype, {
     }
   },
 
-  setSizingSplit: function() {
-    sizing = {
-      width: ((window.innerWidth * (1.00 - (0.03 + 0.03 + 0.02)- (0.02 * ( d.length - 2)) )) / d.length) + "px",
-      height: (window.innerHeight * 0.84) + "px"
-    }
-  },
+
 
   /**
    * Get the index of the script being focused on
@@ -204,7 +207,7 @@ AppDispatcher.register(function(action) {
     case PlayConstants.PLAY_SPLIT_SCREEN:
       if (action.actionType !== viewMode){
         setDisplayIndex(action.id);
-        PlayStore.setSizingSplit();
+        setSizingSplit();
         PlayStore.setViewMode(action.actionType);
         PlayStore.emitChange();
       }

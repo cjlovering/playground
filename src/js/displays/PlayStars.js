@@ -69,8 +69,8 @@ function Star(i){
             } else {
 
                 //.5 -> .6
-                this.x += (target.x - this.x) * 0.6 / (this.r + this.lag + lagger);
-                this.y += (target.y - this.y) * 0.6 / (this.r + this.lag + lagger);
+                this.x += (target.x - this.x) * 0.5 / (this.r + this.lag + lagger);
+                this.y += (target.y - this.y) * 0.5 / (this.r + this.lag + lagger);
 
                 if (Math.abs(target.x - this.x) < 3 && Math.abs(target.y - this.y) < 3){
                     this.i = 0;
@@ -100,9 +100,9 @@ function Star(i){
 
                 this.t = {x: Math.floor((Math.random() * canvas.width) + 1), y: Math.floor((Math.random() * canvas.height) + 1)};
 
-                //4 -> 0.5
-                this.x += 0.5 * xx;
-                this.y += 0.5 * yy;
+                //4 -> 0.5 -> 1.2
+                this.x += 4 * (xx + 5);
+                this.y += 4 * (yy + 5);
 
             }
 
@@ -227,7 +227,7 @@ var PlayStars = React.createClass({
       this.drawStars();
   },
   configureCavas: function(w, h){
-        canvas.width = w;
+      canvas.width = w;
       canvas.height = h;
   },
   //react life cycle:
