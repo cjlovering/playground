@@ -33466,7 +33466,7 @@ function Star(i) {
     this.React = function () {
 
         //abrupt change from resting to this
-        var ratio = Math.sqrt(square(target.x - this.x) + square(target.y - this.y)) / canvas.width;
+        var ratio = Math.sqrt(square(target.x - this.x) + square(target.y - this.y)) / Math.sqrt(square(canvas.width) + square(canvas.height));;
         if (this.i == 2) {
             this.r = (Math.floor(25 * ratio) + 1 + this.r * 3) / 4;
         } else {
@@ -33505,7 +33505,7 @@ function Star(i) {
 
                 this.i = 2;
 
-                var ratio = Math.sqrt(square(this.t.x - this.x) + square(this.t.y - this.y)) / canvas.width;
+                var ratio = Math.sqrt(square(this.t.x - this.x) + square(this.t.y - this.y)) / Math.sqrt(square(canvas.width) + square(canvas.height));
                 this.r = Math.floor(25 * ratio) + 1;
 
                 this.x += (this.t.x - this.x) * 0.5 / (this.r + this.lag);
