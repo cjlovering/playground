@@ -32159,7 +32159,16 @@ var PlayGround = React.createClass({
           React.createElement(PlayView, { displayInfo: this.state.scriptData,
             splitView: this.state.sizing,
             focusDisplayIndex: this.state.displayIndex,
-            viewMode: this.state.viewMode })
+            viewMode: this.state.viewMode }),
+          React.createElement(
+            'div',
+            { className: 'noteSplitDiv' },
+            React.createElement(
+              'h3',
+              { className: 'noteSplitH' },
+              'double  click on a display to full screen it'
+            )
+          )
         );
         break;
       /**
@@ -32222,7 +32231,10 @@ var PlayPane = React.createClass({
 
     return React.createElement(
       'div',
-      { className: styleName, onMouseEnter: this._onMouseEnter, onDoubleClick: this._onDoubleClick },
+      { className: styleName,
+        onMouseEnter: this._onMouseEnter,
+        onMouseLeave: this._onMouseLeave,
+        onDoubleClick: this._onDoubleClick },
       React.createElement(Display, { displayInfo: this.props.displayInfo,
         height: this.props.splitView.height,
         width: this.props.splitView.width,
@@ -32243,8 +32255,14 @@ var PlayPane = React.createClass({
     PlayActions.focusDisplayIndex(this.props.id);
   },
   /**
+   * remove focus on leave for responsive feel
+   */
+  _onMouseLeave: function () {
+    PlayActions.focusDisplayIndex(-1);
+  },
+  /**
    * go full view mode on this index. really the index
-   * isn't needed, but whatever for now. 
+   * isn't needed, but whatever for now.
    */
   _onDoubleClick: function () {
     PlayActions.goFullViewMode(this.props.id);
@@ -33764,7 +33782,7 @@ var d = [{
 
 var sizing = {
   width: window.innerWidth * (1.00 - (0.03 + 0.03 + 0.02) - 0.02 * (d.length - 2)) / d.length + "px",
-  height: window.innerHeight * 0.80 + "px"
+  height: window.innerHeight * 0.84 + "px"
 };
 
 /**
@@ -33857,7 +33875,7 @@ var PlayStore = assign({}, EventEmitter.prototype, {
   setSizingSplit: function () {
     sizing = {
       width: window.innerWidth * (1.00 - (0.03 + 0.03 + 0.02) - 0.02 * (d.length - 2)) / d.length + "px",
-      height: window.innerHeight * 0.80 + "px"
+      height: window.innerHeight * 0.84 + "px"
     };
   },
 
