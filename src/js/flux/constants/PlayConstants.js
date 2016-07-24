@@ -16,7 +16,8 @@ var PlayConstants = keyMirror({
   PLAY_FULL_SCREEN: null,
   PLAY_SPLIT_SCREEN: null,
   PLAY_RESET: null,
-  PLAY_RESET_ALL: null
+  PLAY_RESET_ALL: null,
+  PLAY_CALCULATE_SIZE: null
 });
 
 module.exports = PlayConstants;

@@ -5,7 +5,7 @@ var PlayFocusView = require('./PlayPane');
 var PlayView = React.createClass({
   formPlayPane: function(di){
     return (
-      <PlayPane key={di.id} id={di.id} displayInfo={di} splitView={this.props.splitView} onScriptHover={this.props.onScriptHover}/>
+      <PlayPane key={di.id} id={di.id} displayInfo={di} sizing={this.props.sizing} onScriptHover={this.props.onScriptHover}/>
     );
   },
   render: function() {

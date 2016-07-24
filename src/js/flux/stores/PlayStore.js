@@ -41,17 +41,22 @@ var CHANGE_EVENT = 'change';
 
  function setSizingSplit(){
     sizing = {
-      width: ((window.innerWidth * (1.00 - (0.03 + 0.03 + 0.02)- (0.02 * ( d.length - 2)) )) / d.length) + "px",
-      height: (window.innerHeight * 0.81) + "px"
+      width: ((window.innerWidth * (1.00 - (0.03 + 0.03 + 0.02)- (0.02 * ( d.length - 2)) )) / d.length),
+      height: (window.innerHeight * 0.81)
+    }
+  };
+
+ function setSizingFull() {
+    sizing = {
+      height: window.innerHeight,
+      width: window.innerWidth
     }
   };
 
  var sizing = {
-     width: ((window.innerWidth * (1.00 - (0.03 + 0.03 + 0.02)- (0.02 * ( d.length - 2)) )) / d.length) + "px",
-     height: (window.innerHeight * 0.81) + "px"
-   };
-
-
+     width: ((window.innerWidth * (1.00 - (0.03 + 0.03 + 0.02)- (0.02 * ( d.length - 2)) )) / d.length),
+     height: (window.innerHeight * 0.81)
+ };
 
 /**
  * index of focus
@@ -136,13 +141,6 @@ var PlayStore = assign({}, EventEmitter.prototype, {
     return sizing;
   },
 
-  setSizingFull: function() {
-    sizing = {
-      height: window.innerHeight,
-      width: window.innerWidth
-    }
-  },
-
 
 
   /**
@@ -199,7 +197,7 @@ AppDispatcher.register(function(action) {
     case PlayConstants.PLAY_FULL_SCREEN:
       if (action.actionType !== viewMode){
         setDisplayIndex(action.id);
-        PlayStore.setSizingFull();
+        setSizingFull();
         PlayStore.setViewMode(action.actionType);
         PlayStore.emitChange();
       }
@@ -211,6 +209,12 @@ AppDispatcher.register(function(action) {
         PlayStore.setViewMode(action.actionType);
         PlayStore.emitChange();
       }
+      break;
+    case PlayConstants.PLAY_CALCULATE_SIZE:
+      if (viewMode !== PlayConstants.PLAY_FULL_SCREEN)
+        setSizingSplit();
+      else
+        setSizingFull();
       break;
     default:
       // no op

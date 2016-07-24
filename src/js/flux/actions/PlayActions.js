@@ -29,7 +29,15 @@ var PlayActions = {
       actionType: PlayConstants.PLAY_SPLIT_SCREEN,
       id: index
     });
-  }
+  },
+  /**
+   * do it!
+   */
+   goCalcuateSizes: function() {
+     AppDispatcher.dispatch({
+      actionType: PlayConstants.PLAY_CALCULATE_SIZE
+    });
+   }
 };
 
 module.exports = PlayActions;

@@ -11,7 +11,7 @@ var PlayView = React.createClass({
                 key={di.id}
                 id={di.id}
                 displayInfo={di}
-                splitView={this.props.splitView}
+                sizing={this.props.sizing}
                 viewMode={this.props.viewMode}/>
     );
   },

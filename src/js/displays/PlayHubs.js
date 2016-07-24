@@ -157,7 +157,7 @@ var PlayHubs = React.createClass({
 
       //loops
       this.loop();
-  },
+  },    
   loop: function(){
     requestAnimationFrame(this.loop);
 

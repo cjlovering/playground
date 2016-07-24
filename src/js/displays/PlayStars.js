@@ -14,6 +14,7 @@ var seek = true;     //move away from
 var lagger = 0;
 var rate = 0;
 var colorIndex = 0;
+var canvasWidth, canvasHeight, diagonal;
 
 //*** api
 
@@ -35,19 +36,19 @@ function exposeParameters(){
 //star class
 function Star(i){
 
-    this.x = Math.floor((Math.random() * canvas.width) + 1);
-    this.y = Math.floor((Math.random() * canvas.height) + 1);
+    this.x = Math.floor((Math.random() * canvasWidth) + 1);
+    this.y = Math.floor((Math.random() * canvasHeight) + 1);
     this.lag = Math.random() < 0.8 ? Math.floor((Math.random() * 13) + 2) : ( Math.random() * 48 + 2 );//Math.floor((Math.random() * 48) + 2);
     this.r = 5;
     this.color = getColor();
     this.t;
     this.i = 1;
-    this.t = {x: Math.floor((Math.random() * canvas.width) + 1), y: Math.floor((Math.random() * canvas.height) + 1)};
+    this.t = {x: Math.floor((Math.random() * canvasWidth) + 1), y: Math.floor((Math.random() * canvasHeight) + 1)};
 
     this.React = function(){
 
         //abrupt change from resting to this
-        var ratio = (Math.sqrt( square(target.x - this.x) + square(target.y - this.y) )) / (Math.sqrt( square(canvas.width) + square(canvas.height) ));;
+        var ratio = (Math.sqrt( square(target.x - this.x) + square(target.y - this.y) )) / diagonal;
         if (this.i == 2) {
             this.r = ((Math.floor ( 25 * ratio ) + 1) + this.r * 3) / 4;
         } else {
@@ -84,12 +85,12 @@ function Star(i){
             var xx = (target.x - this.x);
             var yy = (target.y - this.y);
 
-            if (this.i == 2 || xx > canvas.width / 4 || yy > canvas.height / 4){
+            if (this.i == 2 || xx > canvasWidth / 4 || yy > canvasHeight / 4){
 
 
                 this.i = 2;
 
-                var ratio = (Math.sqrt( square(this.t.x - this.x) + square(this.t.y - this.y) )) / (Math.sqrt( square(canvas.width) + square(canvas.height) ));
+                var ratio = (Math.sqrt( square(this.t.x - this.x) + square(this.t.y - this.y) )) / diagonal;
                 this.r =  Math.floor ( 25 * ratio ) + 1;
 
                 this.x += (this.t.x - this.x) * 0.5 / (this.r + this.lag);
@@ -98,7 +99,7 @@ function Star(i){
 
             } else {
 
-                this.t = {x: Math.floor((Math.random() * canvas.width) + 1), y: Math.floor((Math.random() * canvas.height) + 1)};
+                this.t = {x: Math.floor((Math.random() * canvasWidth) + 1), y: Math.floor((Math.random() * canvasHeight) + 1)};
 
                 //4 -> 0.5 -> 1.2
                 this.x += 4 * (xx + 5);
@@ -149,7 +150,7 @@ var PlayStars = React.createClass({
 
             //target = {x: Math.floor((Math.random() * canvas.width) + 1), y: Math.floor((Math.random() * canvas.height) + 1)};
             //default is congregate in the middle
-            target = {x: Math.floor(0.5 * canvas.width + 1), y: Math.floor(0.5 * canvas.height + 1)};
+            target = {x: Math.floor(0.5 * canvasWidth + 1), y: Math.floor(0.5 * canvasHeight + 1)};
 
             this.createStars(star_num);
 
@@ -215,27 +216,44 @@ var PlayStars = React.createClass({
   },
   drawStars: function() {
       ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
       //todo: for performance, draww all stars modulo the same at the same time (to do the same color)
       for (s in stars) {
           stars[s].React();
       }
   },
-  onResizeDraw: function(){
-      this.configureCanvas();
-      this.drawStars();
+  onResizeReConfigure: function(x, y){
+    //rather than calculate parameters based on current width
+    //   and height,
+    // var c = document.getElementById(this.props.displayInfo.canvasId);
+    // var newSize = {
+    //   width: x + "px",
+    //   height: y + "px"
+    // };
+    // c.classlist.add(newSize);
+    //canvas.width = x;
+    //canvas.height = y;
+
   },
-  configureCavas: function(w, h){
-      canvas.width = w;
-      canvas.height = h;
+  componentWillReceiveProps: function(nextProps){
+    if(this.props.width  != nextProps.width || this.props.height != nextProps.height){
+      canvasWidth  = nextProps.width;
+      canvasHeight = nextProps.height;
+      diagonal = Math.sqrt( square(nextProps.width) + square(nextProps.height) );
+      this.onResizeReConfigure(nextProps.width, nextProps.height);
+    }
   },
   //react life cycle:
   componentDidMount: function(){
+    diagonal = Math.sqrt( square(this.props.width) + square(this.props.height) );
+    canvasWidth  = this.props.width;
+    canvasHeight = this.props.height;
     this.play();
   },
   componentWillUnmount: function(){
     //this.state.play = "false";
+    stars = [];
   },
   render: function() {
     if (this.props.viewMode == PlayConstants.PLAY_FULL_SCREEN){
@@ -260,6 +278,11 @@ var PlayStars = React.createClass({
         break;//hopefully doesn't happen
     }
     return PlayDisplayAPI.renderDisplay(this.props);
+      // (<canvas id={this.props.displayInfo.canvasId}
+      //         className={styleName}
+      //         width={this.props.width}
+      //         height={this.props.height}>
+      // </canvas>);
   }
 });
 

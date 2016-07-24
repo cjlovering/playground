@@ -6,7 +6,7 @@ var PlayDisplayAPI = {
    */
   renderDisplay: function(props){
     var styleName = "playViewCanvas" + props.focus;
-    var c = props.splitView == "false" ? false :
+    var c =
       <canvas id={props.displayInfo.canvasId}
               className={styleName}
               width={props.width}

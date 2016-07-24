@@ -4,7 +4,11 @@ var PlayTitlePane = require('./PlayTitlePane');
 var PlayView = require('./PlayView');
 var PlayConstants = require('./../flux/constants/PlayConstants');
 var PlayFullView = require('./PlayFullView');
+var PlayActions = require('./../flux/actions/PlayActions');
+var $ = require('jQuery');
 
+//resize id kept track of
+var resizeId;
 
 /**
  * Retrieve the current data from the store
@@ -17,19 +21,6 @@ function getPlayState() {
     viewMode: PlayStore.getViewMode(),
     displayIndex: PlayStore.getDisplayIndex()
   };
-}
-
-var hoverScript = -1;
-
-function onScriptHover(i) {
-  console.log("script is being focused on");
-  hoverScript = i;
-}
-
-function setSplitViewActive(i) {
-  console.log(splitView.live);
-  splitView.live = false;
-  return i; //i is the index of the active script
 }
 
 /**
@@ -48,6 +39,7 @@ var PlayGround = React.createClass({
      this.setState(getPlayState());
    },
    componentDidMount: function() {
+     window.addEventListener('resize', this._eventListenerResize);
      PlayStore.addChangeListener(this._onChange);
    },
    componentWillUnmount: function() {
@@ -61,7 +53,7 @@ var PlayGround = React.createClass({
           <div className="playGround">
             <PlayTitlePane name="stars" />
             <PlayView displayInfo={this.state.scriptData}
-                      splitView={this.state.sizing}
+                      sizing={this.state.sizing}
                       focusDisplayIndex={this.state.displayIndex}
                       viewMode={this.state.viewMode}/>
             <div className="noteSplitDiv" >
@@ -90,7 +82,7 @@ var PlayGround = React.createClass({
           <PlayFullView focus={true}
                         id={this.state.displayIndex}
                         displayInfo={this.state.scriptData[this.state.displayIndex]}
-                        splitView={this.state.sizing}
+                        sizing={this.state.sizing}
                         viewMode={this.props.viewMode}/>
         );
         break;
@@ -101,7 +93,21 @@ var PlayGround = React.createClass({
      }
 
     return value;
+  },
+  _eventListenerResize: function(){
+    console.log("timeout");
+    clearTimeout(resizeId);
+    resizeId = setTimeout(this._onResizeAction, 250);
+  },
+
+  /**
+   * go full view mode on this index. really the index
+   * isn't needed, but whatever for now.
+   */
+  _onResizeAction: function(){
+    console.log("resize action");
+    PlayActions.goCalcuateSizes();
   }
 });
-//Width="250px" splitViewHeight="600px" splitView="true"
+
 module.exports = PlayGround;

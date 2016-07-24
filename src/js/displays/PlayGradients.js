@@ -125,6 +125,9 @@ var PlayGradients = React.createClass({
   componentWillUnmount: function(){
 
   },
+  testFunction(x,y){
+    console.log("testFunction called in PlayGradients", x, y);
+  },
   render: function() {
     if (this.props.viewMode == PlayConstants.PLAY_SPLIT_SCREEN)
     switch (this.props.playMode) {
