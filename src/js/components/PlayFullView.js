@@ -53,19 +53,18 @@ var PlayFullView = React.createClass({
                  playMode={PlayConstants.PLAY_PLAY_FAST}
                  viewMode={PlayConstants.PLAY_FULL_SCREEN}
                  play="true"/>
-                 <ReactCSSTransitionGroup
-                          transitionName="noteTransition"
-                          transitionEnterTimeout={550}
-                          transitionLeaveTimeout={550}
-                        >
-                   {note}
-                   </ReactCSSTransitionGroup>
       </div>
 
 
     );
   },
-
+  //  <ReactCSSTransitionGroup
+  //           transitionName="noteTransition"
+  //           transitionEnterTimeout={550}
+  //           transitionLeaveTimeout={550}
+  //         >
+  //    {note}
+  //    </ReactCSSTransitionGroup>
 
 
   /**

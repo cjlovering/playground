@@ -32050,18 +32050,16 @@ var PlayFullView = React.createClass({
         focus: true,
         playMode: PlayConstants.PLAY_PLAY_FAST,
         viewMode: PlayConstants.PLAY_FULL_SCREEN,
-        play: 'true' }),
-      React.createElement(
-        ReactCSSTransitionGroup,
-        {
-          transitionName: 'noteTransition',
-          transitionEnterTimeout: 550,
-          transitionLeaveTimeout: 550
-        },
-        note
-      )
+        play: 'true' })
     );
   },
+  //  <ReactCSSTransitionGroup
+  //           transitionName="noteTransition"
+  //           transitionEnterTimeout={550}
+  //           transitionLeaveTimeout={550}
+  //         >
+  //    {note}
+  //    </ReactCSSTransitionGroup>
 
   /**
    * if mouse moves in the top 15% of the page, pull down menu
