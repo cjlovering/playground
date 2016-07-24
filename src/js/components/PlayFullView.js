@@ -45,8 +45,8 @@ var PlayFullView = React.createClass({
         </ReactCSSTransitionGroup>
 
         <Display displayInfo={this.props.displayInfo}
-                 height={this.props.splitView.height}
-                 width={this.props.splitView.width}
+                 height={this.props.sizing.height}
+                 width={this.props.sizing.width}
                  onScriptHover={this.props.onScriptHover}
                  id={this.props.id}
                  focus={true}

@@ -6,6 +6,8 @@ var PlayConstants = require('./../flux/constants/PlayConstants');
 
 //script variables
 var canvas, ctx;
+var canvasHeight, canvasWidth;
+
 var resizeId;
 //    var star_num = 40;
 var stars = [];       //create stars
@@ -86,8 +88,8 @@ function Star(x, y, vx, vy) {
 
     //if out of bounds, move towards inbounds - note: this may be unnesscesarily expensive
     //the other option would be spawning anew
-    if ((this.x > canvas.width) && (this.vx > 0)) this.vx *= -1;
-    if ((this.y > canvas.width) && (this.vy > 0)) this.vy *= -1;
+    if ((this.x > canvasWidth) && (this.vx > 0)) this.vx *= -1;
+    if ((this.y > canvasHeight) && (this.vy > 0)) this.vy *= -1; //it was canvas.width - mistake?
     if ((this.x < 0) && (this.vy < 0)) this.vy *= -1;
     if ((this.y < 0) && (this.vy < 0)) this.vy *= -1;
 
@@ -157,14 +159,14 @@ var PlayHubs = React.createClass({
 
       //loops
       this.loop();
-  },    
+  },
   loop: function(){
     requestAnimationFrame(this.loop);
 
     ANGLE = Math.PI / data.angle;
 
 		ctx = canvas.getContext('2d');
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		ctx.clearRect(0, 0, this.props.width, this.props.height);
 
 		var l = data.star_num;
 		var ll = stars.length;
@@ -187,8 +189,8 @@ var PlayHubs = React.createClass({
   createStars: function(x){
     for ( var i = 0; i < x; i++)
     {
-      var x  = util.random(0,  canvas.width);
-      var y  = util.random(0, canvas.height);
+      var x  = util.random(0, this.props.width);
+      var y  = util.random(0, this.props.height);
       var vx = util.random(1, SPEED, .1);
       var vy = util.random(1, SPEED, .1);
 
@@ -201,6 +203,13 @@ var PlayHubs = React.createClass({
   reduceStars: function(x){
     for (var i = 0; i < x; i++) stars.pop();
   },
+  componentWillReceiveProps: function(nextProps){
+    if(this.props.width != nextProps.width || this.props.height != nextProps.height){
+      canvasWidth  = nextProps.width;
+      canvasHeight = nextProps.height;
+      this.configureCanvas(nextProps.width, nextProps.height);
+    }
+  },
   componentDidMount: function(){
     //this.createStars(data.star_num);
     this.play();
@@ -208,24 +217,18 @@ var PlayHubs = React.createClass({
   componentWillUnmount: function(){
     stars.length = 0;
   },
-  onResizeDraw: function() {
-    this.configureCanvas();
-    this.drawStars();
-  },
   /**
    *  configureCanvas :: (void) -> (void)
    *  sizes canvas to be the size of the window
    *  sizes thresholds
    */
-  configureCanvas: function(){
-    var h = $(window).height();
-    var w = $(window).width();
-
-    canvas.width = w;
-    canvas.height = h;
+  configureCanvas: function(x, y){
+    //compare this with just letting css do its job.
+    canvas.width = x;
+    canvas.height = y;
   },
   drawStars: function() {
-    var t = (data.threshold) * Math.sqrt(util.square(canvas.width) + util.square(canvas.height));
+    var t = (data.threshold) * Math.sqrt(util.square(this.props.width) + util.square(this.props.height));
     var n;
     var ss, zz;
 
