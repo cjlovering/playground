@@ -215,6 +215,7 @@ AppDispatcher.register(function(action) {
         setSizingSplit();
       else
         setSizingFull();
+      PlayStore.emitChange();
       break;
     default:
       // no op

@@ -207,7 +207,7 @@ var PlayHubs = React.createClass({
     if(this.props.width != nextProps.width || this.props.height != nextProps.height){
       canvasWidth  = nextProps.width;
       canvasHeight = nextProps.height;
-      this.configureCanvas(nextProps.width, nextProps.height);
+      //this.configureCanvas(nextProps.width, nextProps.height);
     }
   },
   componentDidMount: function(){
@@ -280,7 +280,6 @@ var PlayHubs = React.createClass({
       default:
         break;//hopefully doesn't happen
     }
-
     return PlayDisplayAPI.renderDisplay(this.props);
   }
 });

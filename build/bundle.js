@@ -32043,8 +32043,8 @@ var PlayFullView = React.createClass({
         title
       ),
       React.createElement(Display, { displayInfo: this.props.displayInfo,
-        height: this.props.splitView.height,
-        width: this.props.splitView.width,
+        height: this.props.sizing.height,
+        width: this.props.sizing.width,
         onScriptHover: this.props.onScriptHover,
         id: this.props.id,
         focus: true,
@@ -32100,6 +32100,11 @@ var PlayTitlePane = require('./PlayTitlePane');
 var PlayView = require('./PlayView');
 var PlayConstants = require('./../flux/constants/PlayConstants');
 var PlayFullView = require('./PlayFullView');
+var PlayActions = require('./../flux/actions/PlayActions');
+var $ = require('jQuery');
+
+//resize id kept track of
+var resizeId;
 
 /**
  * Retrieve the current data from the store
@@ -32112,19 +32117,6 @@ function getPlayState() {
     viewMode: PlayStore.getViewMode(),
     displayIndex: PlayStore.getDisplayIndex()
   };
-}
-
-var hoverScript = -1;
-
-function onScriptHover(i) {
-  console.log("script is being focused on");
-  hoverScript = i;
-}
-
-function setSplitViewActive(i) {
-  console.log(splitView.live);
-  splitView.live = false;
-  return i; //i is the index of the active script
 }
 
 /**
@@ -32145,6 +32137,7 @@ var PlayGround = React.createClass({
     this.setState(getPlayState());
   },
   componentDidMount: function () {
+    window.addEventListener('resize', this._eventListenerResize);
     PlayStore.addChangeListener(this._onChange);
   },
   componentWillUnmount: function () {
@@ -32159,18 +32152,9 @@ var PlayGround = React.createClass({
           { className: 'playGround' },
           React.createElement(PlayTitlePane, { name: 'stars' }),
           React.createElement(PlayView, { displayInfo: this.state.scriptData,
-            splitView: this.state.sizing,
+            sizing: this.state.sizing,
             focusDisplayIndex: this.state.displayIndex,
-            viewMode: this.state.viewMode }),
-          React.createElement(
-            'div',
-            { className: 'noteSplitDiv' },
-            React.createElement(
-              'h3',
-              { className: 'noteSplitH' },
-              'double  click on a display to full screen it'
-            )
-          )
+            viewMode: this.state.viewMode })
         );
         break;
       /**
@@ -32192,7 +32176,7 @@ var PlayGround = React.createClass({
         value = React.createElement(PlayFullView, { focus: true,
           id: this.state.displayIndex,
           displayInfo: this.state.scriptData[this.state.displayIndex],
-          splitView: this.state.sizing,
+          sizing: this.state.sizing,
           viewMode: this.props.viewMode });
         break;
       default:
@@ -32202,13 +32186,27 @@ var PlayGround = React.createClass({
     }
 
     return value;
+  },
+  _eventListenerResize: function () {
+    console.log("timeout");
+    clearTimeout(resizeId);
+    resizeId = setTimeout(this._onResizeAction, 250);
+  },
+
+  /**
+   * go full view mode on this index. really the index
+   * isn't needed, but whatever for now.
+   */
+  _onResizeAction: function () {
+    console.log("resize action");
+    PlayActions.goCalcuateSizes();
   }
 });
-//Width="250px" splitViewHeight="600px" splitView="true"
+
 module.exports = PlayGround;
 
 
-},{"./../flux/constants/PlayConstants":199,"./../flux/stores/PlayStore":201,"./PlayFullView":187,"./PlayTitlePane":190,"./PlayView":191,"react":185}],189:[function(require,module,exports){
+},{"./../flux/actions/PlayActions":198,"./../flux/constants/PlayConstants":199,"./../flux/stores/PlayStore":201,"./PlayFullView":187,"./PlayTitlePane":190,"./PlayView":191,"jQuery":32,"react":185}],189:[function(require,module,exports){
 var React = require('react');
 
 var PlayViewLabel = require('./PlayViewLabel');
@@ -32238,8 +32236,8 @@ var PlayPane = React.createClass({
         onMouseLeave: this._onMouseLeave,
         onDoubleClick: this._onDoubleClick },
       React.createElement(Display, { displayInfo: this.props.displayInfo,
-        height: this.props.splitView.height,
-        width: this.props.splitView.width,
+        height: this.props.sizing.height,
+        width: this.props.sizing.width,
         onScriptHover: this.props.onScriptHover,
         id: this.props.id,
         focus: focus,
@@ -32313,7 +32311,7 @@ var PlayView = React.createClass({
       key: di.id,
       id: di.id,
       displayInfo: di,
-      splitView: this.props.splitView,
+      sizing: this.props.sizing,
       viewMode: this.props.viewMode });
   },
   render: function () {
@@ -32367,7 +32365,7 @@ var PlayDisplayAPI = {
    */
   renderDisplay: function (props) {
     var styleName = "playViewCanvas" + props.focus;
-    var c = props.splitView == "false" ? false : React.createElement("canvas", { id: props.displayInfo.canvasId,
+    var c = React.createElement("canvas", { id: props.displayInfo.canvasId,
       className: styleName,
       width: props.width,
       height: props.height });
@@ -32503,6 +32501,9 @@ var PlayGradients = React.createClass({
         this.play();
     },
     componentWillUnmount: function () {},
+    testFunction(x, y) {
+        console.log("testFunction called in PlayGradients", x, y);
+    },
     render: function () {
         if (this.props.viewMode == PlayConstants.PLAY_SPLIT_SCREEN) switch (this.props.playMode) {
             case PlayConstants.PLAY_PLAY_FAST:
@@ -33111,6 +33112,8 @@ var PlayHexLife = React.createClass({
     render: function () {
         //TODO: move this out of render -> should be in
         //some component's props might change etc.
+        //configureHexagonParameters();
+
         switch (this.props.playMode) {
             case PlayConstants.PLAY_PLAY_FAST:
                 //normal continue
@@ -33147,6 +33150,8 @@ var PlayConstants = require('./../flux/constants/PlayConstants');
 
 //script variables
 var canvas, ctx;
+var canvasHeight, canvasWidth;
+
 var resizeId;
 //    var star_num = 40;
 var stars = []; //create stars
@@ -33228,8 +33233,8 @@ function Star(x, y, vx, vy) {
 
     //if out of bounds, move towards inbounds - note: this may be unnesscesarily expensive
     //the other option would be spawning anew
-    if (this.x > canvas.width && this.vx > 0) this.vx *= -1;
-    if (this.y > canvas.width && this.vy > 0) this.vy *= -1;
+    if (this.x > canvasWidth && this.vx > 0) this.vx *= -1;
+    if (this.y > canvasHeight && this.vy > 0) this.vy *= -1; //it was canvas.width - mistake?
     if (this.x < 0 && this.vy < 0) this.vy *= -1;
     if (this.y < 0 && this.vy < 0) this.vy *= -1;
 
@@ -33306,7 +33311,7 @@ var PlayHubs = React.createClass({
     ANGLE = Math.PI / data.angle;
 
     ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, this.props.width, this.props.height);
 
     var l = data.star_num;
     var ll = stars.length;
@@ -33327,8 +33332,8 @@ var PlayHubs = React.createClass({
   */
   createStars: function (x) {
     for (var i = 0; i < x; i++) {
-      var x = util.random(0, canvas.width);
-      var y = util.random(0, canvas.height);
+      var x = util.random(0, this.props.width);
+      var y = util.random(0, this.props.height);
       var vx = util.random(1, SPEED, .1);
       var vy = util.random(1, SPEED, .1);
 
@@ -33341,6 +33346,13 @@ var PlayHubs = React.createClass({
   reduceStars: function (x) {
     for (var i = 0; i < x; i++) stars.pop();
   },
+  componentWillReceiveProps: function (nextProps) {
+    if (this.props.width != nextProps.width || this.props.height != nextProps.height) {
+      canvasWidth = nextProps.width;
+      canvasHeight = nextProps.height;
+      //this.configureCanvas(nextProps.width, nextProps.height);
+    }
+  },
   componentDidMount: function () {
     //this.createStars(data.star_num);
     this.play();
@@ -33348,24 +33360,18 @@ var PlayHubs = React.createClass({
   componentWillUnmount: function () {
     stars.length = 0;
   },
-  onResizeDraw: function () {
-    this.configureCanvas();
-    this.drawStars();
-  },
   /**
    *  configureCanvas :: (void) -> (void)
    *  sizes canvas to be the size of the window
    *  sizes thresholds
    */
-  configureCanvas: function () {
-    var h = $(window).height();
-    var w = $(window).width();
-
-    canvas.width = w;
-    canvas.height = h;
+  configureCanvas: function (x, y) {
+    //compare this with just letting css do its job.
+    canvas.width = x;
+    canvas.height = y;
   },
   drawStars: function () {
-    var t = data.threshold * Math.sqrt(util.square(canvas.width) + util.square(canvas.height));
+    var t = data.threshold * Math.sqrt(util.square(this.props.width) + util.square(this.props.height));
     var n;
     var ss, zz;
 
@@ -33415,7 +33421,6 @@ var PlayHubs = React.createClass({
       default:
         break; //hopefully doesn't happen
     }
-
     return PlayDisplayAPI.renderDisplay(this.props);
   }
 });
@@ -33440,6 +33445,7 @@ var seek = true; //move away from
 var lagger = 0;
 var rate = 0;
 var colorIndex = 0;
+var canvasWidth, canvasHeight, diagonal;
 
 //*** api
 
@@ -33454,19 +33460,19 @@ function exposeParameters() {}
 //star class
 function Star(i) {
 
-    this.x = Math.floor(Math.random() * canvas.width + 1);
-    this.y = Math.floor(Math.random() * canvas.height + 1);
+    this.x = Math.floor(Math.random() * canvasWidth + 1);
+    this.y = Math.floor(Math.random() * canvasHeight + 1);
     this.lag = Math.random() < 0.8 ? Math.floor(Math.random() * 13 + 2) : Math.random() * 48 + 2; //Math.floor((Math.random() * 48) + 2);
     this.r = 5;
     this.color = getColor();
     this.t;
     this.i = 1;
-    this.t = { x: Math.floor(Math.random() * canvas.width + 1), y: Math.floor(Math.random() * canvas.height + 1) };
+    this.t = { x: Math.floor(Math.random() * canvasWidth + 1), y: Math.floor(Math.random() * canvasHeight + 1) };
 
     this.React = function () {
 
         //abrupt change from resting to this
-        var ratio = Math.sqrt(square(target.x - this.x) + square(target.y - this.y)) / Math.sqrt(square(canvas.width) + square(canvas.height));;
+        var ratio = Math.sqrt(square(target.x - this.x) + square(target.y - this.y)) / diagonal;
         if (this.i == 2) {
             this.r = (Math.floor(25 * ratio) + 1 + this.r * 3) / 4;
         } else {
@@ -33501,18 +33507,18 @@ function Star(i) {
             var xx = target.x - this.x;
             var yy = target.y - this.y;
 
-            if (this.i == 2 || xx > canvas.width / 4 || yy > canvas.height / 4) {
+            if (this.i == 2 || xx > canvasWidth / 4 || yy > canvasHeight / 4) {
 
                 this.i = 2;
 
-                var ratio = Math.sqrt(square(this.t.x - this.x) + square(this.t.y - this.y)) / Math.sqrt(square(canvas.width) + square(canvas.height));
+                var ratio = Math.sqrt(square(this.t.x - this.x) + square(this.t.y - this.y)) / diagonal;
                 this.r = Math.floor(25 * ratio) + 1;
 
                 this.x += (this.t.x - this.x) * 0.5 / (this.r + this.lag);
                 this.y += (this.t.y - this.y) * 0.5 / (this.r + this.lag);
             } else {
 
-                this.t = { x: Math.floor(Math.random() * canvas.width + 1), y: Math.floor(Math.random() * canvas.height + 1) };
+                this.t = { x: Math.floor(Math.random() * canvasWidth + 1), y: Math.floor(Math.random() * canvasHeight + 1) };
 
                 //4 -> 0.5 -> 1.2
                 this.x += 4 * (xx + 5);
@@ -33563,7 +33569,7 @@ var PlayStars = React.createClass({
 
             //target = {x: Math.floor((Math.random() * canvas.width) + 1), y: Math.floor((Math.random() * canvas.height) + 1)};
             //default is congregate in the middle
-            target = { x: Math.floor(0.5 * canvas.width + 1), y: Math.floor(0.5 * canvas.height + 1) };
+            target = { x: Math.floor(0.5 * canvasWidth + 1), y: Math.floor(0.5 * canvasHeight + 1) };
 
             this.createStars(star_num);
 
@@ -33626,27 +33632,44 @@ var PlayStars = React.createClass({
     },
     drawStars: function () {
         ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
         //todo: for performance, draww all stars modulo the same at the same time (to do the same color)
         for (s in stars) {
             stars[s].React();
         }
     },
-    onResizeDraw: function () {
-        this.configureCanvas();
-        this.drawStars();
+    onResizeReConfigure: function (x, y) {
+        //rather than calculate parameters based on current width
+        //   and height,
+        // var c = document.getElementById(this.props.displayInfo.canvasId);
+        // var newSize = {
+        //   width: x + "px",
+        //   height: y + "px"
+        // };
+        // c.classlist.add(newSize);
+        //canvas.width = x;
+        //canvas.height = y;
+
     },
-    configureCavas: function (w, h) {
-        canvas.width = w;
-        canvas.height = h;
+    componentWillReceiveProps: function (nextProps) {
+        if (this.props.width != nextProps.width || this.props.height != nextProps.height) {
+            canvasWidth = nextProps.width;
+            canvasHeight = nextProps.height;
+            diagonal = Math.sqrt(square(nextProps.width) + square(nextProps.height));
+            this.onResizeReConfigure(nextProps.width, nextProps.height);
+        }
     },
     //react life cycle:
     componentDidMount: function () {
+        diagonal = Math.sqrt(square(this.props.width) + square(this.props.height));
+        canvasWidth = this.props.width;
+        canvasHeight = this.props.height;
         this.play();
     },
     componentWillUnmount: function () {
         //this.state.play = "false";
+        stars = [];
     },
     render: function () {
         if (this.props.viewMode == PlayConstants.PLAY_FULL_SCREEN) {
@@ -33670,6 +33693,11 @@ var PlayStars = React.createClass({
                 break; //hopefully doesn't happen
         }
         return PlayDisplayAPI.renderDisplay(this.props);
+        // (<canvas id={this.props.displayInfo.canvasId}
+        //         className={styleName}
+        //         width={this.props.width}
+        //         height={this.props.height}>
+        // </canvas>);
     }
 });
 
@@ -33708,6 +33736,14 @@ var PlayActions = {
       actionType: PlayConstants.PLAY_SPLIT_SCREEN,
       id: index
     });
+  },
+  /**
+   * do it!
+   */
+  goCalcuateSizes: function () {
+    AppDispatcher.dispatch({
+      actionType: PlayConstants.PLAY_CALCULATE_SIZE
+    });
   }
 };
 
@@ -33733,7 +33769,8 @@ var PlayConstants = keyMirror({
   PLAY_FULL_SCREEN: null,
   PLAY_SPLIT_SCREEN: null,
   PLAY_RESET: null,
-  PLAY_RESET_ALL: null
+  PLAY_RESET_ALL: null,
+  PLAY_CALCULATE_SIZE: null
 });
 
 module.exports = PlayConstants;
@@ -33783,14 +33820,21 @@ var d = [{
 
 function setSizingSplit() {
   sizing = {
-    width: window.innerWidth * (1.00 - (0.03 + 0.03 + 0.02) - 0.02 * (d.length - 2)) / d.length + "px",
-    height: window.innerHeight * 0.81 + "px"
+    width: window.innerWidth * (1.00 - (0.03 + 0.03 + 0.02) - 0.02 * (d.length - 2)) / d.length,
+    height: window.innerHeight * 0.81
+  };
+};
+
+function setSizingFull() {
+  sizing = {
+    height: window.innerHeight,
+    width: window.innerWidth
   };
 };
 
 var sizing = {
-  width: window.innerWidth * (1.00 - (0.03 + 0.03 + 0.02) - 0.02 * (d.length - 2)) / d.length + "px",
-  height: window.innerHeight * 0.81 + "px"
+  width: window.innerWidth * (1.00 - (0.03 + 0.03 + 0.02) - 0.02 * (d.length - 2)) / d.length,
+  height: window.innerHeight * 0.81
 };
 
 /**
@@ -33873,13 +33917,6 @@ var PlayStore = assign({}, EventEmitter.prototype, {
     return sizing;
   },
 
-  setSizingFull: function () {
-    sizing = {
-      height: window.innerHeight,
-      width: window.innerWidth
-    };
-  },
-
   /**
    * Get the index of the script being focused on
    * @return {number}
@@ -33934,7 +33971,7 @@ AppDispatcher.register(function (action) {
     case PlayConstants.PLAY_FULL_SCREEN:
       if (action.actionType !== viewMode) {
         setDisplayIndex(action.id);
-        PlayStore.setSizingFull();
+        setSizingFull();
         PlayStore.setViewMode(action.actionType);
         PlayStore.emitChange();
       }
@@ -33946,6 +33983,10 @@ AppDispatcher.register(function (action) {
         PlayStore.setViewMode(action.actionType);
         PlayStore.emitChange();
       }
+      break;
+    case PlayConstants.PLAY_CALCULATE_SIZE:
+      if (viewMode !== PlayConstants.PLAY_FULL_SCREEN) setSizingSplit();else setSizingFull();
+      PlayStore.emitChange();
       break;
     default:
     // no op

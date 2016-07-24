@@ -27,14 +27,14 @@ body {
   padding-right: 2%;
 }
 .playViewCanvas {
-  -webkit-box-shadow: -9px 10px 23px 0px rgba(0,0,0,0.75);
-  -moz-box-shadow: -9px 10px 23px 0px rgba(0,0,0,0.75);
-  box-shadow: -9px 10px 23px 0px rgba(0,0,0,0.75);
+  -webkit-box-shadow: -7px 16px 19px 0px rgba(0,0,0,0.75);
+  -moz-box-shadow: -7px 16px 19px 0px rgba(0,0,0,0.75);
+  box-shadow: -7px 8px 19px 0px rgba(0,0,0,0.75);
 }
 .playViewCanvas.focused {
-  -webkit-box-shadow: -9px 10px 23px 0px rgba( 167, 74, 199,0.75);
-  -moz-box-shadow: -9px 10px 23px 0px rgba( 167, 74, 199,0.75);
-  box-shadow: -9px 10px 23px 0px rgba( 167, 74, 199,0.75);
+  -webkit-box-shadow: -7px 16px 19px 0px rgba( 167, 74, 199,0.75);
+  -moz-box-shadow: -7px 16px 19px 0px rgba( 167, 74, 199,0.75);
+  box-shadow: -7px 8px 19px 0px rgba( 167, 74, 199,0.75);
 }
 .fullTitleBannerDiv {
   z-index: 100;
@@ -84,11 +84,10 @@ h1 {
   border-bottom: 1px solid #ddd;
   font-size: 2.5em;
 }
-
 h2 {
   text-align: center;
   border-bottom: 1px solid #eee;
-  font-size: 0.8em;
+  font-size: 1.3em;
 }
 h2.focused {
   border-bottom: 1px solid #A74AC7	;

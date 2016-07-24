@@ -352,6 +352,8 @@ var PlayHexLife = React.createClass({
     render: function() {
       //TODO: move this out of render -> should be in
       //some component's props might change etc.
+      //configureHexagonParameters();
+
       switch (this.props.playMode) {
         case PlayConstants.PLAY_PLAY_FAST:
           //normal continue
@@ -372,7 +374,7 @@ var PlayHexLife = React.createClass({
           break;//hopefully doesn't happen
       }
 
-      return PlayDisplayAPI.renderDisplay(this.props);
+      return  PlayDisplayAPI.renderDisplay(this.props);
     }
 });
 
