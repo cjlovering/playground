@@ -31988,8 +31988,7 @@ var PlayFullView = React.createClass({
   displayName: 'PlayFullView',
 
   componentWillMount: function () {
-    this.setState({ "title": false });
-    this.setState({ "note": false });
+    this.setState({ "settingsVisible": false });
   },
   render: function () {
     Display = PlayStore.getDisplayModule(this.props.id);
@@ -32001,48 +32000,17 @@ var PlayFullView = React.createClass({
      */
     var focus = this.props.focus ? " focused" : " unfocused";
 
-    var title = this.state.title ? React.createElement(
-      'div',
-      { className: 'fullTitleBannerDiv', display: 'none' },
-      React.createElement(
-        'h1',
-        { className: 'fullTitleBannerH' },
-        ' playground: ',
-        React.createElement(
-          'span',
-          { className: 'subFullTitleBannerH' },
-          this.props.displayInfo.name
-        )
-      )
-    ) : null;
-
-    var note = this.state.note ? React.createElement(
-      'div',
-      { className: 'noteBannerDiv', key: '2' },
-      React.createElement(
-        'h3',
-        { className: 'noteBannerH' },
-        ' double click to see all displays'
-      )
-    ) : null;
-
     /**
      *  TODO: going to have to change it later, so when switching from
      *  focus to full, you keep the same settings
      */
     return React.createElement(
       'div',
-      { className: styleName, onMouseMove: this._onMouseMove, onDoubleClick: this._onDoubleClick },
-      React.createElement(
-        ReactCSSTransitionGroup,
-        {
-          transitionName: 'banner',
-          transitionEnterTimeout: 550,
-          transitionLeaveTimeout: 550
-        },
-        title
-      ),
+      { className: styleName,
+        onMouseMove: this._onMouseMove,
+        onDoubleClick: this._onDoubleClick },
       React.createElement(Display, { displayInfo: this.props.displayInfo,
+        name: this.props.displayInfo.name,
         height: this.props.sizing.height,
         width: this.props.sizing.width,
         onScriptHover: this.props.onScriptHover,
@@ -32050,7 +32018,8 @@ var PlayFullView = React.createClass({
         focus: true,
         playMode: PlayConstants.PLAY_PLAY_FAST,
         viewMode: PlayConstants.PLAY_FULL_SCREEN,
-        play: 'true' })
+        play: 'true',
+        settingsVisible: this.state.settingsVisible })
     );
   },
   //  <ReactCSSTransitionGroup
@@ -32065,20 +32034,14 @@ var PlayFullView = React.createClass({
    * if mouse moves in the top 15% of the page, pull down menu
    */
   _onMouseMove: function (e) {
-    console.log(Display);
 
-    var y = e.nativeEvent.y;
-    var h = window.innerHeight;
+    var x = e.nativeEvent.x;
+    var w = window.innerWidth;
 
-    if (!this.state.title && y < 0.20 * h) {
-      this.setState({ "title": true });
-      this.setState({ "note": false });
-    } else if ((this.state.title || this.state.note) && y > 0.20 * h && y < 0.77 * h) {
-      this.setState({ "title": false });
-      this.setState({ "note": false });
-    } else if (!this.state.note && y > 0.77 * h) {
-      this.setState({ "title": false });
-      this.setState({ "note": true });
+    if (!this.state.settingsVisible && x < 0.10 * w) {
+      this.setState({ "settingsVisible": true });
+    } else if (this.state.settingsVisible && x > 0.25 * w) {
+      this.setState({ "settingsVisible": false });
     }
   },
 
@@ -32180,7 +32143,6 @@ var PlayGround = React.createClass({
           viewMode: this.props.viewMode });
         break;
       default:
-        console.log(this.state.viewMode);
         value = null;
       //hopefully un-reachable
     }
@@ -32188,7 +32150,6 @@ var PlayGround = React.createClass({
     return value;
   },
   _eventListenerResize: function () {
-    console.log("timeout");
     clearTimeout(resizeId);
     resizeId = setTimeout(this._onResizeAction, 250);
   },
@@ -32198,7 +32159,6 @@ var PlayGround = React.createClass({
    * isn't needed, but whatever for now.
    */
   _onResizeAction: function () {
-    console.log("resize action");
     PlayActions.goCalcuateSizes();
   }
 });
@@ -32390,6 +32350,7 @@ var React = require('react');
 var $ = require('jquery'); //installed with node
 var PlayConstants = require('./../flux/constants/PlayConstants');
 var PlayDisplayAPI = require('./PlayDisplayAPI');
+var ReactCSSTransitionGroup = require('react-addons-css-transition-group');
 
 /** ENUMS **/
 var RAND = {
@@ -32412,13 +32373,13 @@ var count = 0;
 var finish;
 
 /* prev ractive variables: gonna store em together for ease */
-var tempProps = {
+var settings = {
     start: "0000FF",
     end: "88FF00",
     play: PlayConstants.PLAY_PLAY_SLOW,
     boost: 26,
     increment: 0.10,
-    time: 100
+    rate: 100
 };
 
 //for now we're not gonna make the control box visible
@@ -32431,7 +32392,7 @@ var PlayGradients = React.createClass({
 
         if (canvas.getContext) {
             ctx = canvas.getContext('2d');
-            this.configureCanvas(tempProps.start, tempProps.end);
+            this.configureCanvas(settings.start, settings.end);
             configureColor();
             this.loop();
         } else console.log("Canvas context not found");
@@ -32440,7 +32401,7 @@ var PlayGradients = React.createClass({
         //to start, we're just gonna let it run as fast as it can and see
         //gonna experiment keeping this boost factor vs not.
 
-        for (var i = 0; i < (tempProps.boost < 20 ? tempProps.boost : tempProps.boost * 25); i++) {
+        for (var i = 0; i < (settings.boost < 20 ? settings.boost : settings.boost * 25); i++) {
             paint();
             count += 1;
             if (count >= finish) {
@@ -32455,8 +32416,8 @@ var PlayGradients = React.createClass({
             }
         }
 
-        if (tempProps.time > 0) {
-            setTimeout(this.loop, tempProps.time);
+        if (settings.rate > 0) {
+            setTimeout(this.loop, settings.rate);
         } else {
             requestAnimationFrame(this.loop);
         }
@@ -32509,19 +32470,26 @@ var PlayGradients = React.createClass({
         this.play();
     },
     componentWillUnmount: function () {},
-    testFunction(x, y) {
-        console.log("testFunction called in PlayGradients", x, y);
+    handleBoostChange: function (e) {
+        //document.getElementById('range1').innerHTML = e.target.value;
+        settings.boost = e.target.value;
+        this.forceUpdate();
+    },
+    handleIncrementChange: function (e) {
+        settings.increment = e.target.value;
+        this.forceUpdate();
+        //this.setState({ alpha: value });
     },
     render: function () {
         if (this.props.viewMode == PlayConstants.PLAY_SPLIT_SCREEN) switch (this.props.playMode) {
             case PlayConstants.PLAY_PLAY_FAST:
                 //normal continue
-                tempProps.boost = 26;
-                tempProps.time = 0;
+                settings.boost = 26;
+                settings.rate = 0;
                 break;
             case PlayConstants.PLAY_PLAY_SLOW:
-                tempProps.boost = 15;
-                tempProps.time = 50;
+                settings.boost = 15;
+                settings.rate = 50;
                 //slow continue
                 break;
             case PlayConstants.PLAY_PLAY_STOP:
@@ -32533,7 +32501,94 @@ var PlayGradients = React.createClass({
             default:
                 break; //hopefully doesn't happen
         }
-        return PlayDisplayAPI.renderDisplay(this.props);
+        var canvasJSX = PlayDisplayAPI.getCanvasDisplay(this.props);
+
+        // var settings = this.props.settingsVisible ?
+        //                 <div className="settingsDiv">
+        //                   <h3 className="settingsH"> settings!!! </h3>
+        //                   <input id="slider" type="range" min="1" max="100" step="1" value={star_num}/>
+        //                   <span>{star_num}</span>
+        //                   <input id="slider2" type="range" min="0.0" max="1.0" step=".01" value={alpha}/>
+        //                   <span>{alpha}</span>
+        //
+        //                 </div> : null;
+
+        var forms = this.props.settingsVisible ? React.createElement(
+            'div',
+            { className: 'settingsDiv' },
+            React.createElement(
+                'h2',
+                null,
+                this.props.name
+            ),
+            React.createElement(
+                'form',
+                { className: 'form' },
+                React.createElement(
+                    'div',
+                    { className: 'formField' },
+                    React.createElement(
+                        'h3',
+                        { className: 'settingSectionH' },
+                        'Acceleration'
+                    ),
+                    React.createElement('input', {
+                        id: 'slider1',
+                        type: 'range',
+                        max: 100,
+                        min: 0,
+                        step: 1,
+                        value: settings.boost,
+                        onChange: this.handleBoostChange
+                    }),
+                    React.createElement(
+                        'output',
+                        { id: 'range1' },
+                        settings.boost
+                    )
+                ),
+                React.createElement(
+                    'div',
+                    { className: 'formField' },
+                    React.createElement(
+                        'h3',
+                        { className: 'settingSectionH' },
+                        'Color Increment'
+                    ),
+                    React.createElement('input', {
+                        id: 'slider2',
+                        type: 'range',
+                        max: 1.00,
+                        min: 0.01,
+                        step: 0.01,
+                        value: settings.increment,
+                        onChange: this.handleIncrementChange
+                    }),
+                    React.createElement(
+                        'output',
+                        { id: 'range2' },
+                        settings.increment
+                    )
+                )
+            )
+        ) : null;
+
+        return React.createElement(
+            'div',
+            null,
+            React.createElement(
+                ReactCSSTransitionGroup,
+                {
+                    transitionName: 'settingsDiv',
+                    transitionEnterTimeout: 550,
+                    transitionLeaveTimeout: 550
+                },
+                forms
+            ),
+            canvasJSX
+        );
+
+        //  return PlayDisplayAPI.renderDisplay(this.props);
     }
 });
 
@@ -32691,11 +32746,11 @@ function floor(i) {
 function nextColor() {
     //to start we'll one at a time
     if (floor(cr) != er) {
-        cr += tempProps.increment * shiftr;
+        cr += settings.increment * shiftr;
     } else if (floor(cg) != eg) {
-        cg += tempProps.increment * shiftg;
+        cg += settings.increment * shiftg;
     } else if (floor(cb) != eb) {
-        cb += tempProps.increment * shiftb;
+        cb += settings.increment * shiftb;
     } else {
         /* flip start and end */
         // var temp = start;
@@ -32710,7 +32765,7 @@ function nextColor() {
         //cg = sg;
         //cb = sb;
     }
-
+    //console.log(floor(cr), floor(cg), floor(cb));
     return rgb(floor(cr), floor(cg), floor(cb));
 }
 
@@ -32737,8 +32792,8 @@ function reverseColor() {
 }
 
 function configureColor() {
-    var s = parseInt(tempProps.start, 16);
-    var e = parseInt(tempProps.end, 16);
+    var s = parseInt(settings.start, 16);
+    var e = parseInt(settings.end, 16);
     //sr, sg, sb
     sr = s >> 16 & 0xFF;
     sg = s >> 8 & 0xFF;
@@ -32783,7 +32838,6 @@ function randomColor() {
 
 function fadeOut() {
     var timer = setTimeout(function () {
-        console.log("fading");
         //if r is playing
         var p = pixels[xposition][yposition];
         ctx.fillStyle = 'black';
@@ -32802,7 +32856,7 @@ function fadeOut() {
 module.exports = PlayGradients;
 
 
-},{"./../flux/constants/PlayConstants":199,"./PlayDisplayAPI":193,"jquery":33,"react":185}],195:[function(require,module,exports){
+},{"./../flux/constants/PlayConstants":199,"./PlayDisplayAPI":193,"jquery":33,"react":185,"react-addons-css-transition-group":37}],195:[function(require,module,exports){
 //react
 var React = require('react');
 var $ = require('jquery'); //installed with node
@@ -33442,309 +33496,516 @@ var React = require('react');
 var $ = require('jquery'); //installed with node
 var PlayDisplayAPI = require('./PlayDisplayAPI');
 var PlayConstants = require('./../flux/constants/PlayConstants');
+var ReactCSSTransitionGroup = require('react-addons-css-transition-group');
+
+//var InputRange =  require('react-input-range');
 
 //script variables
 var canvas, ctx;
 var resizeId;
-var star_num = 100;
+
 var stars = []; //create stars
 var target; //move towards target
 var seek = true; //move away from
 var lagger = 0;
-var rate = 0;
 var colorIndex = 0;
 var canvasWidth, canvasHeight, diagonal;
 
-//expose below + star_num and target
-var alpha = 0.5;
-var baseSize = 25;
-var explode = 4;
-var escapeThresh = 35;
-var swarmThreshold = 3;
-
-//set state.play = true/false
-
-function reset() {}
-function reConfigureCanvas(w, h) {}
-function exposeParameters() {}
-
-//*** source:
+//waiting on figuring out fix
+var settings = {
+  starNum: 100,
+  alpha: 0.5,
+  baseSize: 25,
+  explode: 4,
+  escapeThresh: 35,
+  swarmThreshold: 3
+};
 
 //star class
 function Star(i) {
 
-    this.x = Math.floor(Math.random() * canvasWidth + 1);
-    this.y = Math.floor(Math.random() * canvasHeight + 1);
-    this.lag = Math.random() < 0.8 ? Math.floor(Math.random() * 13 + 2) : Math.random() * 48 + 2; //Math.floor((Math.random() * 48) + 2);
-    this.r = 5;
-    this.color = getColor();
-    this.t;
-    this.i = 1;
-    this.t = { x: Math.floor(Math.random() * canvasWidth + 1), y: Math.floor(Math.random() * canvasHeight + 1) };
+  this.x = Math.floor(Math.random() * canvasWidth + 1);
+  this.y = Math.floor(Math.random() * canvasHeight + 1);
+  this.lag = Math.random() < 0.8 ? Math.floor(Math.random() * 13 + 2) : Math.random() * 48 + 2; //Math.floor((Math.random() * 48) + 2);
+  this.r = 5;
+  this.color = getColor();
+  this.t;
+  this.i = 1;
+  this.t = { x: Math.floor(Math.random() * canvasWidth + 1), y: Math.floor(Math.random() * canvasHeight + 1) };
 
-    this.React = function () {
+  this.React = function () {
 
-        //abrupt change from resting to this
-        var ratio = Math.sqrt(square(target.x - this.x) + square(target.y - this.y)) / diagonal;
-        if (this.i == 2) {
-            this.r = (Math.floor(baseSize * ratio) + 1 + this.r * 3) / 4;
-        } else {
-            this.r = Math.floor(baseSize * ratio) + 1;
+    //abrupt change from resting to this
+    var ratio = Math.sqrt(square(target.x - this.x) + square(target.y - this.y)) / diagonal;
+    if (this.i == 2) {
+      this.r = (Math.floor(settings.baseSize * ratio) + 1 + this.r * 3) / 4;
+    } else {
+      this.r = Math.floor(settings.baseSize * ratio) + 1;
+    }
+
+    //going towards mouse
+    if (seek) {
+
+      //if we're close enough
+      if (this.i == 0) {
+
+        //move randomly
+        this.x += (Math.round(Math.random()) * 2 - 1) * Math.floor(Math.random() * 5 + 1) * .5 / this.r;
+        this.y += (Math.round(Math.random()) * 2 - 1) * Math.floor(Math.random() * 5 + 1) * .5 / this.r;
+
+        //escape?
+        if (Math.abs(target.x - this.x) > settings.escapeThresh || Math.abs(target.y - this.y) > settings.escapeThresh) {
+          this.i = 1;
         }
 
-        //going towards mouse
-        if (seek) {
+        //go towards the mouse
+      } else {
 
-            //if we're close enough
-            if (this.i == 0) {
+        //.5 -> .6
+        this.x += (target.x - this.x) * settings.alpha / (this.r + this.lag + lagger);
+        this.y += (target.y - this.y) * settings.alpha / (this.r + this.lag + lagger);
 
-                //move randomly
-                this.x += (Math.round(Math.random()) * 2 - 1) * Math.floor(Math.random() * 5 + 1) * .5 / this.r;
-                this.y += (Math.round(Math.random()) * 2 - 1) * Math.floor(Math.random() * 5 + 1) * .5 / this.r;
-
-                //escape?
-                if (Math.abs(target.x - this.x) > escapeThresh || Math.abs(target.y - this.y) > escapeThresh) {
-                    this.i = 1;
-                }
-
-                //go towards the mouse
-            } else {
-
-                //.5 -> .6
-                this.x += (target.x - this.x) * alpha / (this.r + this.lag + lagger);
-                this.y += (target.y - this.y) * alpha / (this.r + this.lag + lagger);
-
-                //if we get really close, star to swarm
-                if (Math.abs(target.x - this.x) < swarmThreshold && Math.abs(target.y - this.y) < swarmThreshold) {
-                    this.i = 0;
-                }
-            }
-
-            //going out explode out!
-        } else {
-
-            //difference between the click
-            var xx = target.x - this.x;
-            var yy = target.y - this.y;
-
-            //finding resting place
-            if (this.i == 2 || xx > canvasWidth / 4 || yy > canvasHeight / 4) {
-
-                this.i = 2;
-
-                var ratio = Math.sqrt(square(this.t.x - this.x) + square(this.t.y - this.y)) / diagonal;
-                this.r = Math.floor(baseSize * ratio) + 1;
-
-                this.x += (this.t.x - this.x) * alpha / (this.r + this.lag);
-                this.y += (this.t.y - this.y) * alpha / (this.r + this.lag);
-
-                //moving out
-            } else {
-
-                this.t = { x: Math.floor(Math.random() * canvasWidth + 1), y: Math.floor(Math.random() * canvasHeight + 1) };
-
-                //4 -> 0.5 -> 1.2
-                this.x += 4 * (xx + 5);
-                this.y += 4 * (yy + 5);
-            }
+        //if we get really close, star to swarm
+        if (Math.abs(target.x - this.x) < settings.swarmThreshold && Math.abs(target.y - this.y) < settings.swarmThreshold) {
+          this.i = 0;
         }
+      }
 
-        ctx.fillStyle = this.color;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2, true);
-        ctx.closePath();
-        ctx.fill();
+      //going out explode out!
+    } else {
 
-        //closer to hide -> faster move away
+      //difference between the click
+      var xx = target.x - this.x;
+      var yy = target.y - this.y;
 
-        //closer to target -> faster move in
+      //finding resting place
+      if (this.i == 2 || xx > canvasWidth / 4 || yy > canvasHeight / 4) {
 
-        //closer to target -> smaller
+        this.i = 2;
 
-        //further from target -> more colorful
-    };
+        var ratio = Math.sqrt(square(this.t.x - this.x) + square(this.t.y - this.y)) / diagonal;
+        this.r = Math.floor(settings.baseSize * ratio) + 1;
+
+        this.x += (this.t.x - this.x) * settings.alpha / (this.r + this.lag);
+        this.y += (this.t.y - this.y) * settings.alpha / (this.r + this.lag);
+
+        //moving out
+      } else {
+
+        this.t = { x: Math.floor(Math.random() * canvasWidth + 1), y: Math.floor(Math.random() * canvasHeight + 1) };
+
+        //4 -> 0.5 -> 1.2
+        this.x += settings.explode * (xx + 5);
+        this.y += settings.explode * (yy + 5);
+      }
+    }
+
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2, true);
+    ctx.closePath();
+    ctx.fill();
+
+    //closer to hide -> faster move away
+
+    //closer to target -> faster move in
+
+    //closer to target -> smaller
+
+    //further from target -> more colorful
+  };
 };
 
 function getColor() {
-    var colors = ["#ccff66", "#FFD700", "#66ccff", "#ff6fcf", "#ff6666", "#F70000", "#D1FF36", "#7FFF00", "#72E6DA", "#1FE3C7", "#4DF8FF", "#0276FD", "#FF00FF"];
-    var z = colorIndex % colors.length;
-    colorIndex += 1;
-    return colors[z];
+  var colors = ["#ccff66", "#FFD700", "#66ccff", "#ff6fcf", "#ff6666", "#F70000", "#D1FF36", "#7FFF00", "#72E6DA", "#1FE3C7", "#4DF8FF", "#0276FD", "#FF00FF"];
+  var z = colorIndex % colors.length;
+  colorIndex += 1;
+  return colors[z];
 };
 
 function square(i) {
-    return i * i;
+  return i * i;
 }
 
 //module
 var PlayStars = React.createClass({
-    displayName: 'PlayStars',
+  displayName: 'PlayStars',
 
-    //usage, post render run this i think
-    play: function () {
-        canvas = document.getElementById(this.props.displayInfo.canvasId);
+  //usage, post render run this i think
+  defaultSettings: function () {
+    settings = {
+      starNum: 100,
+      alpha: 0.5,
+      baseSize: 25,
+      explode: 4,
+      escapeThresh: 35,
+      swarmThreshold: 3
+    };
+  },
+  play: function () {
+    canvas = document.getElementById(this.props.displayInfo.canvasId);
 
-        if (canvas.getContext) {
+    if (canvas.getContext) {
 
-            ctx = canvas.getContext('2d');
+      ctx = canvas.getContext('2d');
 
-            //configureCanvas();
+      //configureCanvas();
 
-            //target = {x: Math.floor((Math.random() * canvas.width) + 1), y: Math.floor((Math.random() * canvas.height) + 1)};
-            //default is congregate in the middle
-            target = { x: Math.floor(0.5 * canvasWidth + 1), y: Math.floor(0.5 * canvasHeight + 1) };
+      //target = {x: Math.floor((Math.random() * canvas.width) + 1), y: Math.floor((Math.random() * canvas.height) + 1)};
+      //default is congregate in the middle
+      target = { x: Math.floor(0.5 * canvasWidth + 1), y: Math.floor(0.5 * canvasHeight + 1) };
 
-            this.createStars(star_num);
+      this.createStars(settings.starNum);
 
-            this.drawStars();
+      this.drawStars();
 
-            canvas.addEventListener("mousemove", function (eventInfo) {
-                //added logic for growth
-                //this.props.onScriptHover(1);//this.props.id
+      canvas.addEventListener("mousemove", function (eventInfo) {
+        //added logic for growth
+        //this.props.onScriptHover(1);//this.props.id
 
-                //endNewLogic
+        //endNewLogic
 
-                seek = true;
-                target = { x: eventInfo.offsetX || eventInfo.layerX, y: eventInfo.offsetY || eventInfo.layerY };
-            });
+        seek = true;
+        target = { x: eventInfo.offsetX || eventInfo.layerX, y: eventInfo.offsetY || eventInfo.layerY };
+      });
 
-            canvas.addEventListener("mouseup", function (eventInfo) {
+      canvas.addEventListener("mouseup", function (eventInfo) {
 
-                //may want to do more here ... EXPLODE
-                seek = false;
-                i = 2;
-                lagger = 150;
-                target = { x: eventInfo.offsetX || eventInfo.layerX, y: eventInfo.offsetY || eventInfo.layerY };
-            });
+        //may want to do more here ... EXPLODE
+        seek = false;
+        i = 2;
+        lagger = 150;
+        target = { x: eventInfo.offsetX || eventInfo.layerX, y: eventInfo.offsetY || eventInfo.layerY };
+      });
 
-            canvas.addEventListener("mouseout", function (eventInfo) {
-                seek = false;
-                i = 2;
-            });
-            /*
-            //todo: comeback to resizeing later, let
-            $(window).resize(function(){
-                clearTimeout(resizeId);
-                resizeId = setTimeout(onResizeDraw, 500);
-            });
-            */
+      canvas.addEventListener("mouseout", function (eventInfo) {
+        seek = false;
+        i = 2;
+      });
+      /*
+      //todo: comeback to resizeing later, let
+      $(window).resize(function(){
+          clearTimeout(resizeId);
+          resizeId = setTimeout(onResizeDraw, 500);
+      });
+      */
 
-            this.loop();
-        }
-    },
-    createStars: function (x) {
-        for (var i = 0; i < x; i++) stars.push(new Star(i));
-    },
-    loop: function () {
-        //if (this.props.play == "true")
-
-        var l = star_num;
-        var ll = stars.length;
-
-        //if (l > ll)      this.createStars(l - ll);
-        //else if (ll > l) this.reduceStars (ll - l);
-        if (l > ll) this.createStars(1);else if (ll > l) this.reduceStars(1);
-
-        requestAnimationFrame(this.loop);
-
-        this.drawStars();
-        if (seek && lagger > 0) lagger -= 10;
-    },
-    reduceStars: function (x) {
-        for (var i = 0; i < x; i++) stars.pop();
-    },
-    drawStars: function () {
-        ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-
-        //todo: for performance, draww all stars modulo the same at the same time (to do the same color)
-        for (s in stars) {
-            stars[s].React();
-        }
-    },
-    onResizeReConfigure: function (x, y) {
-        //rather than calculate parameters based on current width
-        //   and height,
-        // var c = document.getElementById(this.props.displayInfo.canvasId);
-        // var newSize = {
-        //   width: x + "px",
-        //   height: y + "px"
-        // };
-        // c.classlist.add(newSize);
-        //canvas.width = x;
-        //canvas.height = y;
-
-    },
-    componentWillReceiveProps: function (nextProps) {
-        if (this.props.width != nextProps.width || this.props.height != nextProps.height) {
-            canvasWidth = nextProps.width;
-            canvasHeight = nextProps.height;
-            diagonal = Math.sqrt(square(nextProps.width) + square(nextProps.height));
-            this.onResizeReConfigure(nextProps.width, nextProps.height);
-        }
-    },
-    //react life cycle:
-    componentDidMount: function () {
-        diagonal = Math.sqrt(square(this.props.width) + square(this.props.height));
-        canvasWidth = this.props.width;
-        canvasHeight = this.props.height;
-        this.play();
-    },
-    componentWillUnmount: function () {
-        //this.state.play = "false";
-        stars = [];
-    },
-    getHeader: function () {
-        var expandIconJSX = this.props.viewMode == PlayConstants.PLAY_FULL_SCREEN && this.props.focus === " focused" ? React.createElement(
-            'div',
-            null,
-            ' hello world boys '
-        ) : null;
-        return expandIconJSX;
-    },
-    render: function () {
-        if (this.props.viewMode == PlayConstants.PLAY_FULL_SCREEN) {
-            star_num = 175;
-        } else if (this.props.viewMode == PlayConstants.PLAY_SPLIT_SCREEN) switch (this.props.playMode) {
-            case PlayConstants.PLAY_PLAY_FAST:
-                //normal continue
-                star_num = 50;
-                break;
-            case PlayConstants.PLAY_PLAY_SLOW:
-                star_num = 25;
-                //slow continue
-                break;
-            case PlayConstants.PLAY_PLAY_STOP:
-                this.pause();
-                return;
-            case PlayConstants.PLAY_DELETE:
-                this.cleanUp();
-                this.deleteData();
-            default:
-                break; //hopefully doesn't happen
-        }
-
-        var canvasJSX = PlayDisplayAPI.getCanvasDisplay(this.props);
-
-        return React.createElement(
-            'div',
-            null,
-            canvasJSX
-        );
-
-        //PlayDisplayAPI.renderDisplay(this.props);
-        // (<canvas id={this.props.displayInfo.canvasId}
-        //         className={styleName}
-        //         width={this.props.width}
-        //         height={this.props.height}>
-        // </canvas>);
+      this.loop();
     }
-});
+  },
+  createStars: function (x) {
+    for (var i = 0; i < x; i++) stars.push(new Star(i));
+  },
+  loop: function () {
+    //if (this.props.play == "true")
 
+    var l = settings.starNum;
+    var ll = stars.length;
+
+    if (l > ll) this.createStars(l - ll);else if (ll > l) this.reduceStars(ll - l);
+    // if (l > ll)      this.createStars(1);
+    // else if (ll > l) this.reduceStars (1);
+
+    requestAnimationFrame(this.loop);
+
+    this.drawStars();
+    if (seek && lagger > 0) lagger -= 10;
+  },
+  reduceStars: function (x) {
+    for (var i = 0; i < x; i++) stars.pop();
+  },
+  drawStars: function () {
+    ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+    //todo: for performance, draww all stars modulo the same at the same time (to do the same color)
+    for (s in stars) {
+      stars[s].React();
+    }
+  },
+  onResizeReConfigure: function (x, y) {
+    //rather than calculate parameters based on current width
+    //   and height,
+    // var c = document.getElementById(this.props.displayInfo.canvasId);
+    // var newSize = {
+    //   width: x + "px",
+    //   height: y + "px"
+    // };
+    // c.classlist.add(newSize);
+    //canvas.width = x;
+    //canvas.height = y;
+
+  },
+  componentWillReceiveProps: function (nextProps) {
+    if (this.props.width != nextProps.width || this.props.height != nextProps.height) {
+      canvasWidth = nextProps.width;
+      canvasHeight = nextProps.height;
+      diagonal = Math.sqrt(square(nextProps.width) + square(nextProps.height));
+      this.onResizeReConfigure(nextProps.width, nextProps.height);
+    }
+  },
+  componentWillMount: function () {
+    //set settings to defaults;
+
+  },
+  //react life cycle:
+  componentDidMount: function () {
+
+    diagonal = Math.sqrt(square(this.props.width) + square(this.props.height));
+    canvasWidth = this.props.width;
+    canvasHeight = this.props.height;
+
+    this.play();
+
+    // if (this.props.viewMode == PlayConstants.PLAY_FULL_SCREEN){
+    //   this.setState({starNum : 175, rate : 0});
+    // } else if (this.props.viewMode == PlayConstants.PLAY_SPLIT_SCREEN)
+    // switch (this.props.playMode) {
+    //   case PlayConstants.PLAY_PLAY_FAST:
+    //     //normal continue
+    //     this.setState({starNum : 50, rate : 0});
+    //     break;
+    //   case PlayConstants.PLAY_PLAY_SLOW:
+    //     this.setState({starNum : 25, rate : 5});
+    //     //slow continue
+    //     break;
+    //   case PlayConstants.PLAY_PLAY_STOP:
+    //     this.pause();
+    //     return;
+    //   case PlayConstants.PLAY_DELETE:
+    //     this.cleanUp();
+    //     this.deleteData();
+    //   default:
+    //     break;//hopefully doesn't happen
+    // };
+
+    //this.play();
+  },
+  componentWillUnmount: function () {
+    //this.state.play = "false";
+    stars = [];
+  },
+  render: function () {
+    var canvasJSX = PlayDisplayAPI.getCanvasDisplay(this.props);
+
+    // var settings = this.props.settingsVisible ?
+    //                 <div className="settingsDiv">
+    //                   <h3 className="settingsH"> settings!!! </h3>
+    //                   <input id="slider" type="range" min="1" max="100" step="1" value={star_num}/>
+    //                   <span>{star_num}</span>
+    //                   <input id="slider2" type="range" min="0.0" max="1.0" step=".01" value={alpha}/>
+    //                   <span>{alpha}</span>
+    //
+    //                 </div> : null;
+
+    var forms = this.props.settingsVisible ? React.createElement(
+      'div',
+      { className: 'settingsDiv' },
+      React.createElement(
+        'h2',
+        null,
+        this.props.name
+      ),
+      React.createElement(
+        'form',
+        { className: 'form' },
+        React.createElement(
+          'div',
+          { className: 'formField' },
+          React.createElement(
+            'h3',
+            { className: 'settingSectionH' },
+            'Star Count'
+          ),
+          React.createElement('input', {
+            id: 'slider1',
+            type: 'range',
+            max: 1000,
+            min: 0,
+            step: 25,
+            value: settings.starNum,
+            onChange: this.handleStarNumChange
+          }),
+          React.createElement(
+            'output',
+            { 'for': 'slider1', id: 'range1' },
+            settings.starNum
+          )
+        ),
+        React.createElement(
+          'div',
+          { className: 'formField' },
+          React.createElement(
+            'h3',
+            { className: 'settingSectionH' },
+            'Velocity'
+          ),
+          React.createElement('input', {
+            id: 'slider2',
+            type: 'range',
+            max: 2.00,
+            min: 0.01,
+            step: 0.01,
+            value: settings.alpha,
+            onChange: this.handleAlphaChange
+          }),
+          React.createElement(
+            'output',
+            { 'for': 'slider1', id: 'range1' },
+            settings.alpha
+          )
+        ),
+        React.createElement(
+          'div',
+          { className: 'formField' },
+          React.createElement(
+            'h3',
+            { className: 'settingSectionH' },
+            'Star Size'
+          ),
+          React.createElement('input', {
+            id: 'slider4',
+            type: 'range',
+            max: 300,
+            min: 1,
+            step: 1,
+            value: settings.baseSize,
+            onChange: this.handleBaseSizeChange
+          }),
+          React.createElement(
+            'output',
+            { 'for': 'slider1', id: 'range1' },
+            settings.baseSize
+          )
+        ),
+        React.createElement(
+          'div',
+          { className: 'formField' },
+          React.createElement(
+            'h3',
+            { className: 'settingSectionH' },
+            'Explode Multiplier'
+          ),
+          React.createElement('input', {
+            id: 'slider5',
+            type: 'range',
+            max: 10,
+            min: 0.1,
+            step: 0.1,
+            value: settings.explode,
+            onChange: this.handleExplodeChange
+          }),
+          React.createElement(
+            'output',
+            { 'for': 'slider1', id: 'range1' },
+            settings.explode
+          )
+        ),
+        React.createElement(
+          'div',
+          { className: 'formField' },
+          React.createElement(
+            'h3',
+            { className: 'settingSectionH' },
+            'Escape Threshold'
+          ),
+          React.createElement('input', {
+            id: 'slider6',
+            type: 'range',
+            max: 100,
+            min: 0,
+            step: 1,
+            value: settings.escapeThresh,
+            onChange: this.handleEscapeThreshChange
+          }),
+          React.createElement(
+            'output',
+            { 'for': 'slider1', id: 'range1' },
+            settings.escapeThresh
+          )
+        ),
+        React.createElement(
+          'div',
+          { className: 'formField' },
+          React.createElement(
+            'h3',
+            { className: 'settingSectionH' },
+            'Swarm Distance'
+          ),
+          React.createElement('input', {
+            id: 'slider7',
+            type: 'range',
+            max: 10,
+            min: 0,
+            step: 1,
+            value: settings.swarmThreshold,
+            onChange: this.handleSwarmThresholdChange
+          }),
+          React.createElement(
+            'output',
+            { 'for': 'slider1', id: 'range1' },
+            settings.swarmThreshold
+          )
+        )
+      )
+    ) : null;
+
+    return React.createElement(
+      'div',
+      null,
+      React.createElement(
+        ReactCSSTransitionGroup,
+        {
+          transitionName: 'settingsDiv',
+          transitionEnterTimeout: 550,
+          transitionLeaveTimeout: 550
+        },
+        forms
+      ),
+      canvasJSX
+    );
+
+    //PlayDisplayAPI.renderDisplay(this.props);
+    // (<canvas id={this.props.displayInfo.canvasId}
+    //         className={styleName}
+    //         width={this.props.width}
+    //         height={this.props.height}>
+    // </canvas>);
+  },
+  handleStarNumChange: function (e) {
+    //document.getElementById('range1').innerHTML = e.target.value;
+    settings.starNum = e.target.value;
+    this.forceUpdate();
+  },
+  handleAlphaChange: function (e) {
+    settings.alpha = e.target.value;
+    this.forceUpdate();
+    //this.setState({ alpha: value });
+  },
+  handleBaseSizeChange: function (e) {
+    settings.baseSize = e.target.value;
+    this.forceUpdate();
+  },
+  handleExplodeChange: function (e) {
+    settings.explode = e.target.value;
+    this.forceUpdate();
+    //this.setState({ alpha: value });
+  },
+  handleEscapeThreshChange: function (e) {
+    settings.escapeThresh = e.target.value;
+    this.forceUpdate();
+  },
+  handleSwarmThresholdChange: function (e) {
+    settings.swarmThreshold = e.target.value;
+    this.forceUpdate();
+    //this.setState({ alpha: value });
+  }
+
+});
 module.exports = PlayStars;
 
 
-},{"./../flux/constants/PlayConstants":199,"./PlayDisplayAPI":193,"jquery":33,"react":185}],198:[function(require,module,exports){
+},{"./../flux/constants/PlayConstants":199,"./PlayDisplayAPI":193,"jquery":33,"react":185,"react-addons-css-transition-group":37}],198:[function(require,module,exports){
 
 var AppDispatcher = require('./../dispatcher/AppDispatcher');
 var PlayConstants = require('./../constants/PlayConstants');

@@ -82,7 +82,6 @@ var PlayGround = React.createClass({
         );
         break;
        default:
-        console.log(this.state.viewMode);
         value = null;
         //hopefully un-reachable
      }
@@ -90,7 +89,6 @@ var PlayGround = React.createClass({
     return value;
   },
   _eventListenerResize: function(){
-    console.log("timeout");
     clearTimeout(resizeId);
     resizeId = setTimeout(this._onResizeAction, 250);
   },
@@ -100,7 +98,6 @@ var PlayGround = React.createClass({
    * isn't needed, but whatever for now.
    */
   _onResizeAction: function(){
-    console.log("resize action");
     PlayActions.goCalcuateSizes();
   }
 });

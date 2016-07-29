@@ -107,6 +107,28 @@ h1.fullTitleBannerH.focused {
 span.subFullTitleBannerH {
   font-size: 1.7em;
 }
+.settingsDiv {
+  z-index: 100;
+  position: fixed;
+  left: 1%;
+  top: 5%;
+  bot: 5%;
+  height: 90%;
+  min-width: 30px;
+  width: 15%;
+  background-color: rgba(230, 230, 230, 0.49);
+  border-color: black;
+}
+.settingsH {
+  text-align: center;
+  font-size: 1.5em;
+  border-bottom: none;
+}
+.settingsSectionH {
+  text-align: center;
+  font-size: 0.75em;
+  border-bottom: none;
+}
 .noteBannerDiv {
   z-index: 100;
   position: fixed;
@@ -132,6 +154,15 @@ span.subFullTitleBannerH {
   text-align: center;
   font-size: 0.8em;
   border-bottom: none;
+}
+.form {
+  height: 50px;
+  margin: 0 auto;
+  padding-top: 10px;
+  width: 60%;
+}
+.formField {
+  border-bottom: black;
 }
 h3 {
   font-size: 1.5em;

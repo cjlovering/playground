@@ -3,40 +3,31 @@ var React = require('react');
 var $     = require('jquery'); //installed with node
 var PlayDisplayAPI = require('./PlayDisplayAPI');
 var PlayConstants = require('./../flux/constants/PlayConstants');
+var ReactCSSTransitionGroup = require('react-addons-css-transition-group');
+
+//var InputRange =  require('react-input-range');
 
 //script variables
 var canvas, ctx;
 var resizeId;
-var star_num = 100;
+
 var stars = [];       //create stars
 var target; //move towards target
 var seek = true;     //move away from
 var lagger = 0;
-var rate = 0;
 var colorIndex = 0;
 var canvasWidth, canvasHeight, diagonal;
 
-//expose below + star_num and target
-var alpha = 0.5;
-var baseSize =  25;
-var explode = 4;
-var escapeThresh = 35;
-var swarmThreshold = 3;
+//waiting on figuring out fix
+var settings =   {
+    starNum: 100,
+    alpha: 0.5,
+    baseSize: 25,
+    explode: 4,
+    escapeThresh: 35,
+    swarmThreshold: 3
+  };
 
-//set state.play = true/false
-
-function reset(){
-
-}
-function reConfigureCanvas(w, h){
-
-}
-function exposeParameters(){
-
-}
-
-
-//*** source:
 
 //star class
 function Star(i){
@@ -55,9 +46,9 @@ function Star(i){
         //abrupt change from resting to this
         var ratio = (Math.sqrt( square(target.x - this.x) + square(target.y - this.y) )) / diagonal;
         if (this.i == 2) {
-            this.r = ((Math.floor ( baseSize * ratio ) + 1) + this.r * 3) / 4;
+            this.r = ((Math.floor ( settings.baseSize * ratio ) + 1) + this.r * 3) / 4;
         } else {
-            this.r =  Math.floor  ( baseSize * ratio ) + 1;
+            this.r =  Math.floor  ( settings.baseSize * ratio ) + 1;
         }
 
         //going towards mouse
@@ -71,7 +62,7 @@ function Star(i){
                 this.y += (Math.round(Math.random()) * 2 - 1) * (Math.floor((Math.random() * 5) + 1)) * .5 /  ( this.r );
 
                 //escape?
-                if (Math.abs(target.x - this.x) > escapeThresh || Math.abs(target.y - this.y) > escapeThresh ){
+                if (Math.abs(target.x - this.x) > settings.escapeThresh || Math.abs(target.y - this.y) > settings.escapeThresh ){
                     this.i = 1;
                 }
 
@@ -79,11 +70,11 @@ function Star(i){
             } else {
 
                 //.5 -> .6
-                this.x += (target.x - this.x) * alpha / (this.r + this.lag + lagger);
-                this.y += (target.y - this.y) * alpha / (this.r + this.lag + lagger);
+                this.x += (target.x - this.x) * settings.alpha / (this.r + this.lag + lagger);
+                this.y += (target.y - this.y) * settings.alpha / (this.r + this.lag + lagger);
 
                 //if we get really close, star to swarm
-                if (Math.abs(target.x - this.x) < swarmThreshold && Math.abs(target.y - this.y) < swarmThreshold){
+                if (Math.abs(target.x - this.x) < settings.swarmThreshold && Math.abs(target.y - this.y) < settings.swarmThreshold){
                     this.i = 0;
                 }
 
@@ -104,10 +95,10 @@ function Star(i){
                 this.i = 2;
 
                 var ratio = (Math.sqrt( square(this.t.x - this.x) + square(this.t.y - this.y) )) / diagonal;
-                this.r =  Math.floor ( baseSize * ratio ) + 1;
+                this.r =  Math.floor ( settings.baseSize * ratio ) + 1;
 
-                this.x += (this.t.x - this.x) * alpha / (this.r + this.lag);
-                this.y += (this.t.y - this.y) * alpha / (this.r + this.lag);
+                this.x += (this.t.x - this.x) * settings.alpha / (this.r + this.lag);
+                this.y += (this.t.y - this.y) * settings.alpha / (this.r + this.lag);
 
             //moving out
             } else {
@@ -115,8 +106,8 @@ function Star(i){
                 this.t = {x: Math.floor((Math.random() * canvasWidth) + 1), y: Math.floor((Math.random() * canvasHeight) + 1)};
 
                 //4 -> 0.5 -> 1.2
-                this.x += 4 * (xx + 5);
-                this.y += 4 * (yy + 5);
+                this.x += settings.explode * (xx + 5);
+                this.y += settings.explode * (yy + 5);
 
             }
 
@@ -152,6 +143,16 @@ function square(i){
 //module
 var PlayStars = React.createClass({
   //usage, post render run this i think
+  defaultSettings: function(){
+    settings =  {
+        starNum: 100,
+        alpha: 0.5,
+        baseSize: 25,
+        explode: 4,
+        escapeThresh: 35,
+        swarmThreshold: 3
+      };
+  },
   play: function() {
         canvas = document.getElementById(this.props.displayInfo.canvasId);
 
@@ -165,7 +166,7 @@ var PlayStars = React.createClass({
             //default is congregate in the middle
             target = {x: Math.floor(0.5 * canvasWidth + 1), y: Math.floor(0.5 * canvasHeight + 1)};
 
-            this.createStars(star_num);
+            this.createStars(settings.starNum);
 
             this.drawStars();
 
@@ -211,13 +212,13 @@ var PlayStars = React.createClass({
   loop: function(){
     //if (this.props.play == "true")
 
-    var l = star_num;
+    var l  = settings.starNum;
     var ll = stars.length;
 
-    //if (l > ll)      this.createStars(l - ll);
-    //else if (ll > l) this.reduceStars (ll - l);
-    if (l > ll)      this.createStars(1);
-    else if (ll > l) this.reduceStars (1);
+    if (l > ll)      this.createStars(l - ll);
+    else if (ll > l) this.reduceStars (ll - l);
+    // if (l > ll)      this.createStars(1);
+    // else if (ll > l) this.reduceStars (1);
 
     requestAnimationFrame(this.loop);
 
@@ -257,49 +258,157 @@ var PlayStars = React.createClass({
       this.onResizeReConfigure(nextProps.width, nextProps.height);
     }
   },
+  componentWillMount: function(){
+    //set settings to defaults;
+
+  },
   //react life cycle:
   componentDidMount: function(){
+
     diagonal = Math.sqrt( square(this.props.width) + square(this.props.height) );
     canvasWidth  = this.props.width;
     canvasHeight = this.props.height;
+
     this.play();
+
+    // if (this.props.viewMode == PlayConstants.PLAY_FULL_SCREEN){
+    //   this.setState({starNum : 175, rate : 0});
+    // } else if (this.props.viewMode == PlayConstants.PLAY_SPLIT_SCREEN)
+    // switch (this.props.playMode) {
+    //   case PlayConstants.PLAY_PLAY_FAST:
+    //     //normal continue
+    //     this.setState({starNum : 50, rate : 0});
+    //     break;
+    //   case PlayConstants.PLAY_PLAY_SLOW:
+    //     this.setState({starNum : 25, rate : 5});
+    //     //slow continue
+    //     break;
+    //   case PlayConstants.PLAY_PLAY_STOP:
+    //     this.pause();
+    //     return;
+    //   case PlayConstants.PLAY_DELETE:
+    //     this.cleanUp();
+    //     this.deleteData();
+    //   default:
+    //     break;//hopefully doesn't happen
+    // };
+
+
+    //this.play();
   },
   componentWillUnmount: function(){
     //this.state.play = "false";
     stars = [];
   },
-  getHeader: function(){
-    var expandIconJSX = ((this.props.viewMode == PlayConstants.PLAY_FULL_SCREEN)  &&
-                        (this.props.focus === " focused")) ? <div> hello world boys </div> : null;
-    return expandIconJSX;
-  },
   render: function() {
-    if (this.props.viewMode == PlayConstants.PLAY_FULL_SCREEN){
-      star_num = 175;
-    } else if (this.props.viewMode == PlayConstants.PLAY_SPLIT_SCREEN)
-    switch (this.props.playMode) {
-      case PlayConstants.PLAY_PLAY_FAST:
-        //normal continue
-        star_num = 50;
-        break;
-      case PlayConstants.PLAY_PLAY_SLOW:
-        star_num = 25;
-        //slow continue
-        break;
-      case PlayConstants.PLAY_PLAY_STOP:
-        this.pause();
-        return;
-      case PlayConstants.PLAY_DELETE:
-        this.cleanUp();
-        this.deleteData();
-      default:
-        break;//hopefully doesn't happen
-    }
-    
     var canvasJSX = PlayDisplayAPI.getCanvasDisplay(this.props);
 
+    // var settings = this.props.settingsVisible ?
+    //                 <div className="settingsDiv">
+    //                   <h3 className="settingsH"> settings!!! </h3>
+    //                   <input id="slider" type="range" min="1" max="100" step="1" value={star_num}/>
+	  //                   <span>{star_num}</span>
+    //                   <input id="slider2" type="range" min="0.0" max="1.0" step=".01" value={alpha}/>
+    //                   <span>{alpha}</span>
+    //
+    //                 </div> : null;
+
+     var forms =
+     this.props.settingsVisible ?
+     <div className="settingsDiv">
+     <h2>{this.props.name}</h2>
+     <form className="form">
+      <div className="formField">
+        <h3 className="settingSectionH">Star Count</h3>
+        <input
+          id="slider1"
+          type="range"
+          max={1000}
+          min={0}
+          step={25}
+          value={settings.starNum}
+          onChange={this.handleStarNumChange}
+        />
+        <output for="slider1" id="range1">{settings.starNum}</output>
+      </div>
+      <div className="formField">
+        <h3 className="settingSectionH">Velocity</h3>
+        <input
+          id="slider2"
+          type="range"
+          max={2.00}
+          min={0.01}
+          step={0.01}
+          value={settings.alpha}
+          onChange={this.handleAlphaChange}
+        />
+        <output for="slider1" id="range1">{settings.alpha}</output>
+      </div>
+      <div className="formField">
+        <h3 className="settingSectionH">Star Size</h3>
+        <input
+          id="slider4"
+          type="range"
+          max={300}
+          min={1}
+          step={1}
+          value={settings.baseSize}
+          onChange={this.handleBaseSizeChange}
+        />
+        <output for="slider1" id="range1">{settings.baseSize}</output>
+      </div>
+      <div className="formField">
+        <h3 className="settingSectionH">Explode Multiplier</h3>
+        <input
+          id="slider5"
+          type="range"
+          max={10}
+          min={0.1}
+          step={0.1}
+          value={settings.explode}
+          onChange={this.handleExplodeChange}
+        />
+        <output for="slider1" id="range1">{settings.explode}</output>
+      </div>
+      <div className="formField">
+        <h3 className="settingSectionH">Escape Threshold</h3>
+        <input
+          id="slider6"
+          type="range"
+          max={100}
+          min={0}
+          step={1}
+          value={settings.escapeThresh}
+          onChange={this.handleEscapeThreshChange}
+        />
+        <output for="slider1" id="range1">{settings.escapeThresh}</output>
+        </div>
+        <div className="formField">
+          <h3 className="settingSectionH">Swarm Distance</h3>
+          <input
+            id="slider7"
+            type="range"
+            max={10}
+            min={0}
+            step={1}
+            value={settings.swarmThreshold}
+            onChange={this.handleSwarmThresholdChange}
+          />
+          <output for="slider1" id="range1">{settings.swarmThreshold}</output>
+        </div>
+      </form>
+      </div>  : null;
+
     return ( <div>
+              <ReactCSSTransitionGroup
+                     transitionName="settingsDiv"
+                     transitionEnterTimeout={550}
+                     transitionLeaveTimeout={550}
+                   >
+                {forms}
+              </ReactCSSTransitionGroup>
               {canvasJSX}
+
              </div>
            );
 
@@ -309,7 +418,35 @@ var PlayStars = React.createClass({
       //         width={this.props.width}
       //         height={this.props.height}>
       // </canvas>);
-  }
-});
+  },
+  handleStarNumChange: function( e ) {
+    //document.getElementById('range1').innerHTML = e.target.value;
+    settings.starNum = e.target.value;
+    this.forceUpdate();
+  },
+  handleAlphaChange: function( e ) {
+    settings.alpha = e.target.value;
+    this.forceUpdate();
+    //this.setState({ alpha: value });
+  },
+  handleBaseSizeChange: function( e ) {
+    settings.baseSize = e.target.value;
+    this.forceUpdate();
+  },
+  handleExplodeChange: function( e ) {
+    settings.explode = e.target.value;
+    this.forceUpdate();
+    //this.setState({ alpha: value });
+  },
+  handleEscapeThreshChange: function( e ) {
+    settings.escapeThresh = e.target.value;
+    this.forceUpdate();
+  },
+  handleSwarmThresholdChange: function( e ) {
+    settings.swarmThreshold = e.target.value;
+    this.forceUpdate();
+    //this.setState({ alpha: value });
+  },
 
+});
 module.exports = PlayStars;

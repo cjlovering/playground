@@ -3,6 +3,7 @@ var React = require('react');
 var $     = require('jquery'); //installed with node
 var PlayConstants = require('./../flux/constants/PlayConstants');
 var PlayDisplayAPI = require('./PlayDisplayAPI');
+var ReactCSSTransitionGroup = require('react-addons-css-transition-group');
 
 /** ENUMS **/
 var RAND = {
@@ -25,13 +26,13 @@ var count = 0;
 var finish;
 
 /* prev ractive variables: gonna store em together for ease */
-var tempProps = {
+var settings = {
   start: "0000FF",
   end: "88FF00",
   play: PlayConstants.PLAY_PLAY_SLOW,
   boost: 26,
   increment: 0.10,
-  time: 100
+  rate: 100
 };
 
 //for now we're not gonna make the control box visible
@@ -43,7 +44,7 @@ var PlayGradients = React.createClass({
     if (canvas.getContext)
     {
       ctx = canvas.getContext('2d');
-      this.configureCanvas(tempProps.start, tempProps.end);
+      this.configureCanvas(settings.start, settings.end);
       configureColor();
       this.loop();
     } else console.log("Canvas context not found");
@@ -52,7 +53,7 @@ var PlayGradients = React.createClass({
     //to start, we're just gonna let it run as fast as it can and see
     //gonna experiment keeping this boost factor vs not.
 
-    for(var i = 0; i < (tempProps.boost < 20 ? tempProps.boost : (tempProps.boost * 25)); i++)
+    for(var i = 0; i < (settings.boost < 20 ? settings.boost : (settings.boost * 25)); i++)
     {
         paint();
         count += 1;
@@ -68,8 +69,8 @@ var PlayGradients = React.createClass({
         }
     }
 
-    if (tempProps.time > 0){
-      setTimeout(this.loop, tempProps.time);
+    if (settings.rate > 0){
+      setTimeout(this.loop, settings.rate);
     } else {
       requestAnimationFrame(this.loop);
     }
@@ -125,20 +126,27 @@ var PlayGradients = React.createClass({
   componentWillUnmount: function(){
 
   },
-  testFunction(x,y){
-    console.log("testFunction called in PlayGradients", x, y);
+  handleBoostChange: function( e ) {
+    //document.getElementById('range1').innerHTML = e.target.value;
+    settings.boost = e.target.value;
+    this.forceUpdate();
+  },
+  handleIncrementChange: function( e ) {
+    settings.increment = e.target.value;
+    this.forceUpdate();
+    //this.setState({ alpha: value });
   },
   render: function() {
     if (this.props.viewMode == PlayConstants.PLAY_SPLIT_SCREEN)
     switch (this.props.playMode) {
       case PlayConstants.PLAY_PLAY_FAST:
         //normal continue
-        tempProps.boost = 26;
-        tempProps.time  = 0;
+        settings.boost = 26;
+        settings.rate  = 0;
         break;
       case PlayConstants.PLAY_PLAY_SLOW:
-        tempProps.boost = 15;
-        tempProps.time  = 50;
+        settings.boost = 15;
+        settings.rate  = 50;
         //slow continue
         break;
       case PlayConstants.PLAY_PLAY_STOP:
@@ -150,7 +158,67 @@ var PlayGradients = React.createClass({
       default:
         break;//hopefully doesn't happen
     }
-    return PlayDisplayAPI.renderDisplay(this.props);
+    var canvasJSX = PlayDisplayAPI.getCanvasDisplay(this.props);
+
+    // var settings = this.props.settingsVisible ?
+    //                 <div className="settingsDiv">
+    //                   <h3 className="settingsH"> settings!!! </h3>
+    //                   <input id="slider" type="range" min="1" max="100" step="1" value={star_num}/>
+	  //                   <span>{star_num}</span>
+    //                   <input id="slider2" type="range" min="0.0" max="1.0" step=".01" value={alpha}/>
+    //                   <span>{alpha}</span>
+    //
+    //                 </div> : null;
+
+     var forms =
+     this.props.settingsVisible ?
+     <div className="settingsDiv">
+     <h2>{this.props.name}</h2>
+     <form className="form">
+      <div className="formField">
+        <h3 className="settingSectionH">Acceleration</h3>
+        <input
+          id="slider1"
+          type="range"
+          max={100}
+          min={0}
+          step={1}
+          value={settings.boost}
+          onChange={this.handleBoostChange}
+        />
+        <output id="range1">{settings.boost}</output>
+      </div>
+      <div className="formField">
+        <h3 className="settingSectionH">Color Increment</h3>
+        <input
+          id="slider2"
+          type="range"
+          max={1.00}
+          min={0.01}
+          step={0.01}
+          value={settings.increment}
+          onChange={this.handleIncrementChange}
+        />
+        <output id="range2">{settings.increment}</output>
+      </div>
+      </form>
+      </div>  : null;
+
+    return ( <div>
+              <ReactCSSTransitionGroup
+                     transitionName="settingsDiv"
+                     transitionEnterTimeout={550}
+                     transitionLeaveTimeout={550}
+                   >
+                {forms}
+              </ReactCSSTransitionGroup>
+              {canvasJSX}
+
+             </div>
+           );
+
+
+  //  return PlayDisplayAPI.renderDisplay(this.props);
   }
 });
 
@@ -301,15 +369,15 @@ function nextColor()
     //to start we'll one at a time
     if (floor(cr) != er)
     {
-        cr += tempProps.increment * shiftr;
+        cr += settings.increment * shiftr;
     }
     else if (floor(cg) != eg)
     {
-        cg += tempProps.increment * shiftg;
+        cg += settings.increment * shiftg;
     }
     else if (floor(cb) != eb)
     {
-        cb += tempProps.increment *  shiftb;
+        cb += settings.increment *  shiftb;
     }
     else
     {
@@ -326,7 +394,7 @@ function nextColor()
         //cg = sg;
         //cb = sb;
     }
-
+    //console.log(floor(cr), floor(cg), floor(cb));
     return rgb(floor(cr), floor(cg), floor(cb));
 }
 
@@ -353,8 +421,8 @@ function reverseColor()
 
 function configureColor()
 {
-    var s = parseInt(tempProps.start,  16);
-    var e = parseInt(tempProps.end, 16);
+    var s = parseInt(settings.start,  16);
+    var e = parseInt(settings.end, 16);
     //sr, sg, sb
     sr = (s >> 16) & 0xFF;
     sg = (s >> 8)  & 0xFF;
@@ -400,7 +468,6 @@ function randomColor()
 
 function fadeOut(){
   var timer = setTimeout(function(){
-    console.log("fading");
       //if r is playing
       var p = pixels[xposition][yposition];
       ctx.fillStyle = 'black';

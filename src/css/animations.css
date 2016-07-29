@@ -27,3 +27,18 @@
   transform: translate(0%,200%);
   transition: transform 550ms ease-in-out;
 }
+
+.settingsDiv-enter {
+  transform: translate(-120%,0%);
+}
+.settingsDiv-enter.settingsDiv-enter-active {
+  transform: translate(0%,0%);
+  transition: transform 550ms ease-in-out;
+}
+.settingsDiv-leave {
+  transform: translate(0%,0%);
+}
+.settingsDiv-leave.settingsDiv-leave-active {
+  transform: translate(-120%,0%);
+  transition: transform 550ms ease-in-out;
+}
