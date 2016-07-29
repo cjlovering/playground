@@ -329,7 +329,7 @@ var PlayStars = React.createClass({
           value={settings.starNum}
           onChange={this.handleStarNumChange}
         />
-        <output for="slider1" id="range1">{settings.starNum}</output>
+        <output id="range1">{settings.starNum}</output>
       </div>
       <div className="formField">
         <h3 className="settingSectionH">Velocity</h3>
@@ -342,7 +342,7 @@ var PlayStars = React.createClass({
           value={settings.alpha}
           onChange={this.handleAlphaChange}
         />
-        <output for="slider1" id="range1">{settings.alpha}</output>
+        <output id="range1">{settings.alpha}</output>
       </div>
       <div className="formField">
         <h3 className="settingSectionH">Star Size</h3>
@@ -355,7 +355,7 @@ var PlayStars = React.createClass({
           value={settings.baseSize}
           onChange={this.handleBaseSizeChange}
         />
-        <output for="slider1" id="range1">{settings.baseSize}</output>
+        <output id="range1">{settings.baseSize}</output>
       </div>
       <div className="formField">
         <h3 className="settingSectionH">Explode Multiplier</h3>
@@ -368,7 +368,7 @@ var PlayStars = React.createClass({
           value={settings.explode}
           onChange={this.handleExplodeChange}
         />
-        <output for="slider1" id="range1">{settings.explode}</output>
+        <output id="range1">{settings.explode}</output>
       </div>
       <div className="formField">
         <h3 className="settingSectionH">Escape Threshold</h3>
@@ -381,7 +381,7 @@ var PlayStars = React.createClass({
           value={settings.escapeThresh}
           onChange={this.handleEscapeThreshChange}
         />
-        <output for="slider1" id="range1">{settings.escapeThresh}</output>
+        <output id="range1">{settings.escapeThresh}</output>
         </div>
         <div className="formField">
           <h3 className="settingSectionH">Swarm Distance</h3>
@@ -394,7 +394,7 @@ var PlayStars = React.createClass({
             value={settings.swarmThreshold}
             onChange={this.handleSwarmThresholdChange}
           />
-          <output for="slider1" id="range1">{settings.swarmThreshold}</output>
+          <output id="range1">{settings.swarmThreshold}</output>
         </div>
       </form>
       </div>  : null;

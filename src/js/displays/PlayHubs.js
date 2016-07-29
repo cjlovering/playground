@@ -3,6 +3,7 @@ var React = require('react');
 var $     = require('jquery'); //installed with node
 var PlayDisplayAPI = require('./PlayDisplayAPI');
 var PlayConstants = require('./../flux/constants/PlayConstants');
+var ReactCSSTransitionGroup = require('react-addons-css-transition-group');
 
 //script variables
 var canvas, ctx;
@@ -22,24 +23,14 @@ var ANGLE = Math.PI / 180;
 var N_CUTOFF = 6;
 var SPEED = 2;
 
-//edge requirements  - defined in configure canvas
-var build_threshold;
-
 //dynamic data (keeping it static for now for simplicty)
 //i used to use ractive here, but gonna just not for now
-var data = {
+var settings = {
   threshold: 0.21,
   star_num: 25,
   rate: 5,
-  angle: 180,
-  visible: false
+  angle: 180
 };
-
-
-
-//this is going to be a slightly simplified version, probably will reduce interactions
-//AND colors for now.
-
 
 //basic math and utility funcitons
 var util = {
@@ -143,7 +134,7 @@ var PlayHubs = React.createClass({
   play: function(){
       canvas = document.getElementById('hubWay');//update canvas
 
-      ANGLE = Math.PI / data.angle;
+      ANGLE = Math.PI / settings.angle;
 
       //get two-d context (as opposed to 3d)
       ctx = canvas.getContext('2d');
@@ -163,12 +154,12 @@ var PlayHubs = React.createClass({
   loop: function(){
     requestAnimationFrame(this.loop);
 
-    ANGLE = Math.PI / data.angle;
+    ANGLE = Math.PI / settings.angle;
 
 		ctx = canvas.getContext('2d');
 		ctx.clearRect(0, 0, this.props.width, this.props.height);
 
-		var l = data.star_num;
+		var l = settings.star_num;
 		var ll = stars.length;
 
 	  //if (l > ll)      this.createStars(l - ll);
@@ -189,8 +180,8 @@ var PlayHubs = React.createClass({
   createStars: function(x){
     for ( var i = 0; i < x; i++)
     {
-      var x  = util.random(0, this.props.width);
-      var y  = util.random(0, this.props.height);
+      var x  = Math.floor(Math.random() * this.props.width);
+      var y  = Math.floor(Math.random() * this.props.height);
       var vx = util.random(1, SPEED, .1);
       var vy = util.random(1, SPEED, .1);
 
@@ -228,7 +219,7 @@ var PlayHubs = React.createClass({
     canvas.height = y;
   },
   drawStars: function() {
-    var t = (data.threshold) * Math.sqrt(util.square(this.props.width) + util.square(this.props.height));
+    var t = (settings.threshold) * Math.sqrt(util.square(this.props.width) + util.square(this.props.height));
     var n;
     var ss, zz;
 
@@ -253,34 +244,86 @@ var PlayHubs = React.createClass({
   },
   render: function() {
 
-    if (this.props.viewMode == PlayConstants.PLAY_FULL_SCREEN){
-      data.threshold = 0.15;
-      data.star_num = 30;
-    }
-    else if (this.props.viewMode == PlayConstants.PLAY_SPLIT_SCREEN)
-    switch (this.props.playMode) {
-      case PlayConstants.PLAY_PLAY_FAST:
-        //normal continue
-        data.threshold = 0.20;
-        //data.rate = 5;
-        data.star_num = 20;
-        break;
-      case PlayConstants.PLAY_PLAY_SLOW:
-        data.threshold = 0.15;
-        //data.rate = 20;
-        data.star_num = 20;
-        //slow continue
-        break;
-      case PlayConstants.PLAY_PLAY_STOP:
-        this.pause();
-        return;
-      case PlayConstants.PLAY_DELETE:
-        this.cleanUp();
-        this.deleteData();
-      default:
-        break;//hopefully doesn't happen
-    }
-    return PlayDisplayAPI.renderDisplay(this.props);
+    var canvasJSX = PlayDisplayAPI.getCanvasDisplay(this.props);
+
+    var forms =
+    this.props.settingsVisible ?
+    <div className="settingsDiv">
+    <h2>{this.props.name}</h2>
+    <form className="form">
+     <div className="formField">
+       <h3 className="settingSectionH">Bridge Threshold</h3>
+       <input
+         id="slider1"
+         type="range"
+         max={1.0}
+         min={0.0}
+         step={0.01}
+         value={settings.threshold}
+         onChange={this.handleBridgeThresholdChange}
+       />
+       <output id="range1">{settings.threshold * 100}%</output>
+     </div>
+     <div className="formField">
+       <h3 className="settingSectionH">Star Count</h3>
+       <input
+         id="slider2"
+         type="range"
+         max={200}
+         min={1}
+         step={5}
+         value={settings.star_num}
+         onChange={this.handleStarNumChange}
+       />
+       <output id="range2">{settings.star_num}</output>
+     </div>
+     <div className="formField">
+       <h3 className="settingSectionH">Angle</h3>
+       <input
+         id="slider3"
+         type="range"
+         max={360}
+         min={1}
+         step={1}
+         value={settings.angle}
+         onChange={this.handleAngleChange}
+       />
+       <output id="range3">{settings.angle}</output>
+     </div>
+     </form>
+     </div>  : null;
+
+
+   return ( <div>
+             <ReactCSSTransitionGroup
+                    transitionName="settingsDiv"
+                    transitionEnterTimeout={550}
+                    transitionLeaveTimeout={550}
+                  >
+               {forms}
+             </ReactCSSTransitionGroup>
+             {canvasJSX}
+
+            </div>
+          );
+  },
+  handleStarNumChange: function( e ) {
+
+    //document.getElementById('range1').innerHTML = e.target.value;
+    settings.star_num = e.target.value;
+    this.forceUpdate();
+  },
+  handleBridgeThresholdChange: function( e ) {
+
+    settings.threshold = e.target.value;
+    this.forceUpdate();
+    //this.setState({ alpha: value });
+  },
+  handleAngleChange: function( e ) {
+
+    settings.angle = e.target.value;
+    this.forceUpdate();
+    //this.setState({ alpha: value });
   }
 });
 
