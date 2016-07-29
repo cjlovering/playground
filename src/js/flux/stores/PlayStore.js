@@ -120,9 +120,10 @@ var PlayStore = assign({}, EventEmitter.prototype, {
    *  @return {string}
    */
   getPlayViewStyleName: function(index){
-    return index == 0 ? "playViewLeftEdge" :
-                        index == 3 ? "playViewRightEdge" :
-                             "playView";
+
+    return viewMode == PlayConstants.PLAY_SPLIT_SCREEN ? (index == 0 ? "playViewLeftEdge" :
+                                                              index == 3 ? "playViewRightEdge" :
+                                                                    "playView") : "playView";
   },
 
   /**
@@ -140,8 +141,6 @@ var PlayStore = assign({}, EventEmitter.prototype, {
   getSizingInfo: function() {
     return sizing;
   },
-
-
 
   /**
    * Get the index of the script being focused on

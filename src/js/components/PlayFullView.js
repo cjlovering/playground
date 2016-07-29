@@ -5,14 +5,14 @@ var PlayActions = require('./../flux/actions/PlayActions');
 var PlayStore = require('./../flux/stores/PlayStore');
 var PlayConstants = require('./../flux/constants/PlayConstants');
 var ReactCSSTransitionGroup = require('react-addons-css-transition-group');
-
+var Display;
 var PlayFullView = React.createClass({
   componentWillMount: function(){
     this.setState({"title": false});
     this.setState({"note": false});
   },
   render: function() {
-    var Display = PlayStore.getDisplayModule(this.props.id);
+    Display = PlayStore.getDisplayModule(this.props.id);
     var styleName = PlayStore.getPlayViewStyleName(this.props.id);
 
     /**
@@ -71,6 +71,9 @@ var PlayFullView = React.createClass({
    * if mouse moves in the top 15% of the page, pull down menu
    */
   _onMouseMove: function(e){
+    console.log(Display);
+
+
     var y = e.nativeEvent.y;
     var h = window.innerHeight;
 

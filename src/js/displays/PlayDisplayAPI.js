@@ -1,10 +1,10 @@
 var React = require('react');
 var PlayDisplayAPI = {
   /**
-   * The render function for playPanes
-   * return {object} the JSX display
+   * gets the canvas object with correct style and width/height
+   * @param {object} props the properties of the display
    */
-  renderDisplay: function(props){
+  getCanvasDisplay: function(props){
     var styleName = "playViewCanvas" + props.focus;
     var c =
       <canvas id={props.displayInfo.canvasId}
@@ -12,9 +12,15 @@ var PlayDisplayAPI = {
               width={props.width}
               height={props.height}>
       </canvas>;
-    return (
-        c
-    );
+      return c;
+  },
+  /**
+   * The render function for playPanes
+   * return {object} the JSX display
+   */
+  renderDisplay: function(props){
+    var c = this.getCanvasDisplay(props);
+    return ( c );
   }
 };
 

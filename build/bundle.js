@@ -31983,7 +31983,7 @@ var PlayActions = require('./../flux/actions/PlayActions');
 var PlayStore = require('./../flux/stores/PlayStore');
 var PlayConstants = require('./../flux/constants/PlayConstants');
 var ReactCSSTransitionGroup = require('react-addons-css-transition-group');
-
+var Display;
 var PlayFullView = React.createClass({
   displayName: 'PlayFullView',
 
@@ -31992,7 +31992,7 @@ var PlayFullView = React.createClass({
     this.setState({ "note": false });
   },
   render: function () {
-    var Display = PlayStore.getDisplayModule(this.props.id);
+    Display = PlayStore.getDisplayModule(this.props.id);
     var styleName = PlayStore.getPlayViewStyleName(this.props.id);
 
     /**
@@ -32065,6 +32065,8 @@ var PlayFullView = React.createClass({
    * if mouse moves in the top 15% of the page, pull down menu
    */
   _onMouseMove: function (e) {
+    console.log(Display);
+
     var y = e.nativeEvent.y;
     var h = window.innerHeight;
 
@@ -32304,7 +32306,7 @@ var PlayView = React.createClass({
   displayName: 'PlayView',
 
   formPlayPane: function (di) {
-    var focus = this.props.focusDisplayIndex == di.id ? true : false;
+    var focus = this.props.focusDisplayIndex == di.id;
     return React.createElement(PlayPane, { focus: focus,
       key: di.id,
       id: di.id,
@@ -32358,15 +32360,23 @@ module.exports = PlayViewLabel;
 var React = require('react');
 var PlayDisplayAPI = {
   /**
-   * The render function for playPanes
-   * return {object} the JSX display
+   * gets the canvas object with correct style and width/height
+   * @param {object} props the properties of the display
    */
-  renderDisplay: function (props) {
+  getCanvasDisplay: function (props) {
     var styleName = "playViewCanvas" + props.focus;
     var c = React.createElement("canvas", { id: props.displayInfo.canvasId,
       className: styleName,
       width: props.width,
       height: props.height });
+    return c;
+  },
+  /**
+   * The render function for playPanes
+   * return {object} the JSX display
+   */
+  renderDisplay: function (props) {
+    var c = this.getCanvasDisplay(props);
     return c;
   }
 };
@@ -33445,7 +33455,12 @@ var rate = 0;
 var colorIndex = 0;
 var canvasWidth, canvasHeight, diagonal;
 
-//*** api
+//expose below + star_num and target
+var alpha = 0.5;
+var baseSize = 25;
+var explode = 4;
+var escapeThresh = 35;
+var swarmThreshold = 3;
 
 //set state.play = true/false
 
@@ -33472,48 +33487,58 @@ function Star(i) {
         //abrupt change from resting to this
         var ratio = Math.sqrt(square(target.x - this.x) + square(target.y - this.y)) / diagonal;
         if (this.i == 2) {
-            this.r = (Math.floor(25 * ratio) + 1 + this.r * 3) / 4;
+            this.r = (Math.floor(baseSize * ratio) + 1 + this.r * 3) / 4;
         } else {
-            this.r = Math.floor(25 * ratio) + 1;
+            this.r = Math.floor(baseSize * ratio) + 1;
         }
 
         //going towards mouse
         if (seek) {
 
+            //if we're close enough
             if (this.i == 0) {
 
+                //move randomly
                 this.x += (Math.round(Math.random()) * 2 - 1) * Math.floor(Math.random() * 5 + 1) * .5 / this.r;
                 this.y += (Math.round(Math.random()) * 2 - 1) * Math.floor(Math.random() * 5 + 1) * .5 / this.r;
 
-                if (Math.abs(target.x - this.x) > 35 || Math.abs(target.y - this.y) > 35) {
+                //escape?
+                if (Math.abs(target.x - this.x) > escapeThresh || Math.abs(target.y - this.y) > escapeThresh) {
                     this.i = 1;
                 }
+
+                //go towards the mouse
             } else {
 
                 //.5 -> .6
-                this.x += (target.x - this.x) * 0.5 / (this.r + this.lag + lagger);
-                this.y += (target.y - this.y) * 0.5 / (this.r + this.lag + lagger);
+                this.x += (target.x - this.x) * alpha / (this.r + this.lag + lagger);
+                this.y += (target.y - this.y) * alpha / (this.r + this.lag + lagger);
 
-                if (Math.abs(target.x - this.x) < 3 && Math.abs(target.y - this.y) < 3) {
+                //if we get really close, star to swarm
+                if (Math.abs(target.x - this.x) < swarmThreshold && Math.abs(target.y - this.y) < swarmThreshold) {
                     this.i = 0;
                 }
             }
 
-            //going out explode!
+            //going out explode out!
         } else {
 
+            //difference between the click
             var xx = target.x - this.x;
             var yy = target.y - this.y;
 
+            //finding resting place
             if (this.i == 2 || xx > canvasWidth / 4 || yy > canvasHeight / 4) {
 
                 this.i = 2;
 
                 var ratio = Math.sqrt(square(this.t.x - this.x) + square(this.t.y - this.y)) / diagonal;
-                this.r = Math.floor(25 * ratio) + 1;
+                this.r = Math.floor(baseSize * ratio) + 1;
 
-                this.x += (this.t.x - this.x) * 0.5 / (this.r + this.lag);
-                this.y += (this.t.y - this.y) * 0.5 / (this.r + this.lag);
+                this.x += (this.t.x - this.x) * alpha / (this.r + this.lag);
+                this.y += (this.t.y - this.y) * alpha / (this.r + this.lag);
+
+                //moving out
             } else {
 
                 this.t = { x: Math.floor(Math.random() * canvasWidth + 1), y: Math.floor(Math.random() * canvasHeight + 1) };
@@ -33669,6 +33694,14 @@ var PlayStars = React.createClass({
         //this.state.play = "false";
         stars = [];
     },
+    getHeader: function () {
+        var expandIconJSX = this.props.viewMode == PlayConstants.PLAY_FULL_SCREEN && this.props.focus === " focused" ? React.createElement(
+            'div',
+            null,
+            ' hello world boys '
+        ) : null;
+        return expandIconJSX;
+    },
     render: function () {
         if (this.props.viewMode == PlayConstants.PLAY_FULL_SCREEN) {
             star_num = 175;
@@ -33690,7 +33723,16 @@ var PlayStars = React.createClass({
             default:
                 break; //hopefully doesn't happen
         }
-        return PlayDisplayAPI.renderDisplay(this.props);
+
+        var canvasJSX = PlayDisplayAPI.getCanvasDisplay(this.props);
+
+        return React.createElement(
+            'div',
+            null,
+            canvasJSX
+        );
+
+        //PlayDisplayAPI.renderDisplay(this.props);
         // (<canvas id={this.props.displayInfo.canvasId}
         //         className={styleName}
         //         width={this.props.width}
@@ -33896,7 +33938,8 @@ var PlayStore = assign({}, EventEmitter.prototype, {
    *  @return {string}
    */
   getPlayViewStyleName: function (index) {
-    return index == 0 ? "playViewLeftEdge" : index == 3 ? "playViewRightEdge" : "playView";
+
+    return viewMode == PlayConstants.PLAY_SPLIT_SCREEN ? index == 0 ? "playViewLeftEdge" : index == 3 ? "playViewRightEdge" : "playView" : "playView";
   },
 
   /**

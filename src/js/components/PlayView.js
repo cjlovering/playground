@@ -5,7 +5,7 @@ var PlayActions = require('./../flux/actions/PlayActions');
 
 var PlayView = React.createClass({
   formPlayPane: function(di){
-    var focus = this.props.focusDisplayIndex == di.id ? true : false;
+    var focus = this.props.focusDisplayIndex == di.id;
     return (
       <PlayPane focus={focus}
                 key={di.id}
