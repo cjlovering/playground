@@ -357,45 +357,6 @@ var PlayStars = React.createClass({
         />
         <output id="range1">{settings.baseSize}</output>
       </div>
-      <div className="formField">
-        <h3 className="settingSectionH">Explode Multiplier</h3>
-        <input
-          id="slider5"
-          type="range"
-          max={10}
-          min={0.1}
-          step={0.1}
-          value={settings.explode}
-          onChange={this.handleExplodeChange}
-        />
-        <output id="range1">{settings.explode}</output>
-      </div>
-      <div className="formField">
-        <h3 className="settingSectionH">Escape Threshold</h3>
-        <input
-          id="slider6"
-          type="range"
-          max={100}
-          min={0}
-          step={1}
-          value={settings.escapeThresh}
-          onChange={this.handleEscapeThreshChange}
-        />
-        <output id="range1">{settings.escapeThresh}</output>
-        </div>
-        <div className="formField">
-          <h3 className="settingSectionH">Swarm Distance</h3>
-          <input
-            id="slider7"
-            type="range"
-            max={10}
-            min={0}
-            step={1}
-            value={settings.swarmThreshold}
-            onChange={this.handleSwarmThresholdChange}
-          />
-          <output id="range1">{settings.swarmThreshold}</output>
-        </div>
       </form>
       </div>  : null;
 
@@ -432,21 +393,7 @@ var PlayStars = React.createClass({
   handleBaseSizeChange: function( e ) {
     settings.baseSize = e.target.value;
     this.forceUpdate();
-  },
-  handleExplodeChange: function( e ) {
-    settings.explode = e.target.value;
-    this.forceUpdate();
-    //this.setState({ alpha: value });
-  },
-  handleEscapeThreshChange: function( e ) {
-    settings.escapeThresh = e.target.value;
-    this.forceUpdate();
-  },
-  handleSwarmThresholdChange: function( e ) {
-    settings.swarmThreshold = e.target.value;
-    this.forceUpdate();
-    //this.setState({ alpha: value });
-  },
+  }
 
 });
 module.exports = PlayStars;

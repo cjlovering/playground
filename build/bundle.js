@@ -33963,75 +33963,6 @@ var PlayStars = React.createClass({
             { id: 'range1' },
             settings.baseSize
           )
-        ),
-        React.createElement(
-          'div',
-          { className: 'formField' },
-          React.createElement(
-            'h3',
-            { className: 'settingSectionH' },
-            'Explode Multiplier'
-          ),
-          React.createElement('input', {
-            id: 'slider5',
-            type: 'range',
-            max: 10,
-            min: 0.1,
-            step: 0.1,
-            value: settings.explode,
-            onChange: this.handleExplodeChange
-          }),
-          React.createElement(
-            'output',
-            { id: 'range1' },
-            settings.explode
-          )
-        ),
-        React.createElement(
-          'div',
-          { className: 'formField' },
-          React.createElement(
-            'h3',
-            { className: 'settingSectionH' },
-            'Escape Threshold'
-          ),
-          React.createElement('input', {
-            id: 'slider6',
-            type: 'range',
-            max: 100,
-            min: 0,
-            step: 1,
-            value: settings.escapeThresh,
-            onChange: this.handleEscapeThreshChange
-          }),
-          React.createElement(
-            'output',
-            { id: 'range1' },
-            settings.escapeThresh
-          )
-        ),
-        React.createElement(
-          'div',
-          { className: 'formField' },
-          React.createElement(
-            'h3',
-            { className: 'settingSectionH' },
-            'Swarm Distance'
-          ),
-          React.createElement('input', {
-            id: 'slider7',
-            type: 'range',
-            max: 10,
-            min: 0,
-            step: 1,
-            value: settings.swarmThreshold,
-            onChange: this.handleSwarmThresholdChange
-          }),
-          React.createElement(
-            'output',
-            { id: 'range1' },
-            settings.swarmThreshold
-          )
         )
       )
     ) : null;
@@ -34071,20 +34002,6 @@ var PlayStars = React.createClass({
   handleBaseSizeChange: function (e) {
     settings.baseSize = e.target.value;
     this.forceUpdate();
-  },
-  handleExplodeChange: function (e) {
-    settings.explode = e.target.value;
-    this.forceUpdate();
-    //this.setState({ alpha: value });
-  },
-  handleEscapeThreshChange: function (e) {
-    settings.escapeThresh = e.target.value;
-    this.forceUpdate();
-  },
-  handleSwarmThresholdChange: function (e) {
-    settings.swarmThreshold = e.target.value;
-    this.forceUpdate();
-    //this.setState({ alpha: value });
   }
 
 });
