@@ -33,12 +33,12 @@
 }
 .settingsDiv-enter.settingsDiv-enter-active {
   transform: translate(0%,0%);
-  transition: transform 550ms ease-in-out;
+  transition: transform 350ms ease-in-out;
 }
 .settingsDiv-leave {
   transform: translate(0%,0%);
 }
 .settingsDiv-leave.settingsDiv-leave-active {
   transform: translate(-120%,0%);
-  transition: transform 550ms ease-in-out;
+  transition: transform 350ms ease-in-out;
 }

@@ -22,8 +22,7 @@ var PlayPane = React.createClass({
     return (
       <div className={styleName}
            onMouseEnter={this._onMouseEnter}
-           onMouseLeave={this._onMouseLeave}
-           onDoubleClick={this._onDoubleClick}>
+           onMouseLeave={this._onMouseLeave}>
         <Display displayInfo={this.props.displayInfo}
                  height={this.props.sizing.height}
                  width={this.props.sizing.width}
@@ -34,7 +33,11 @@ var PlayPane = React.createClass({
                  viewMode={this.props.viewMode}
                  play="true"/>
 
-        <PlayViewLabel focus={focus} name={this.props.displayInfo.name} description={this.props.displayInfo.text}/>
+        <PlayViewLabel gitLink={this.props.displayInfo.gitLink}
+                       fullScreenEvent={this._onDoubleClick}
+                       focus={focus}
+                       name={this.props.displayInfo.name}
+                       description={this.props.displayInfo.text}/>
       </div>
     );
   },

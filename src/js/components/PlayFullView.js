@@ -27,8 +27,7 @@ var PlayFullView = React.createClass({
      */
     return (
       <div className={styleName}
-           onMouseMove={this._onMouseMove}
-           onDoubleClick={this._onDoubleClick}>
+           onMouseMove={this._onMouseMove}>
         <Display displayInfo={this.props.displayInfo}
                  name={this.props.displayInfo.name}
                  height={this.props.sizing.height}
@@ -70,12 +69,12 @@ var PlayFullView = React.createClass({
 
   },
 
-  /**
-   * go back to sp
-   */
-  _onDoubleClick: function(){
-    PlayActions.goSplitViewMode(this.props.id);
-  }
+  // /**
+  //  * go back to sp
+  //  */
+  // _onDoubleClick: function(){
+  //   PlayActions.goSplitViewMode(this.props.id);
+  // }
 });
 
 module.exports = PlayFullView;

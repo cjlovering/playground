@@ -17,25 +17,30 @@ var CHANGE_EVENT = 'change';
          "id": 0,
          "name": "stars",
          "canvasId": "starZone",
-         "text": "Smooth interactive system of stars."
+         "text": "Smooth interactive system of stars.",
+         "gitLink": "https://github.com/cjlovering/playground/blob/gh-pages/src/js/displays/PlayStars.js"
      },
      {
          "id": 1,
          "name": "hubs",
          "canvasId": "hubWay",
-         "text": "Set of hubs interconnected and moving."
+         "text": "Set of hubs interconnected and moving.",
+         "gitLink": "https://github.com/cjlovering/playground/blob/gh-pages/src/js/displays/PlayHubs.js"
      },
      {
          "id": 2,
          "name": "hexlife",
          "canvasId": "hexMap",
-         "text": "Game of life on a hexagonal grid"
+         "text": "Game of life on a hexagonal grid",
+         "gitLink": "https://github.com/cjlovering/playground/blob/gh-pages/src/js/displays/PlayHexLife.js"
      },
      {
          "id": 3,
          "name": "gradients",
          "canvasId": "pixelMap",
-         "text": "A continuous stream of gradients covering a canvas between random colors."
+         "text": "A continuous stream of gradients covering a canvas between random colors.",
+         "gitLink": "https://github.com/cjlovering/playground/blob/gh-pages/src/js/displays/PlayGradients.js"
+
      }
  ];
 

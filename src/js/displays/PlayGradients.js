@@ -4,6 +4,7 @@ var $     = require('jquery'); //installed with node
 var PlayConstants = require('./../flux/constants/PlayConstants');
 var PlayDisplayAPI = require('./PlayDisplayAPI');
 var ReactCSSTransitionGroup = require('react-addons-css-transition-group');
+var PlayActions = require('./../flux/actions/PlayActions');
 
 /** ENUMS **/
 var RAND = {
@@ -32,7 +33,8 @@ var settings = {
   play: PlayConstants.PLAY_PLAY_SLOW,
   boost: 26,
   increment: 0.10,
-  rate: 100
+  rate: 100,
+  playing: true
 };
 
 //for now we're not gonna make the control box visible
@@ -53,7 +55,8 @@ var PlayGradients = React.createClass({
     //to start, we're just gonna let it run as fast as it can and see
     //gonna experiment keeping this boost factor vs not.
 
-    for(var i = 0; i < (settings.boost < 20 ? settings.boost : (settings.boost * 25)); i++)
+    if(settings.playing)
+    for(var i = 0; i < (settings.boost < 20 ? settings.boost : (settings.boost * 10)); i++)
     {
         paint();
         count += 1;
@@ -159,56 +162,86 @@ var PlayGradients = React.createClass({
         break;//hopefully doesn't happen
     }
     var canvasJSX = PlayDisplayAPI.getCanvasDisplay(this.props);
+    var iconGit = "fa fa-github fa-lg settingIcon" + this.props.focus;
+    var iconDownload = "fa fa-download fa-lg settingIcon" + this.props.focus;
+    var iconCompress = "fa fa-compress fa-lg settingIcon" + this.props.focus;
+    var iconPausePlay = settings.playing ? "fa fa-pause fa-lg settingIcon" + this.props.focus :
+                                           "fa fa-play fa-lg settingIcon" + this.props.focus;
+    var iconRefresh = "fa fa-refresh fa-lg settingIcon" + this.props.focus;
+    var iconClear = "fa fa-eraser fa-lg settingIcon" + this.props.focus;
 
-    // var settings = this.props.settingsVisible ?
-    //                 <div className="settingsDiv">
-    //                   <h3 className="settingsH"> settings!!! </h3>
-    //                   <input id="slider" type="range" min="1" max="100" step="1" value={star_num}/>
-	  //                   <span>{star_num}</span>
-    //                   <input id="slider2" type="range" min="0.0" max="1.0" step=".01" value={alpha}/>
-    //                   <span>{alpha}</span>
-    //
-    //                 </div> : null;
+
 
      var forms =
      this.props.settingsVisible ?
      <div className="settingsDiv">
-     <h2>{this.props.name}</h2>
-     <form className="form">
-      <div className="formField">
-        <h3 className="settingSectionH">Acceleration</h3>
-        <input
-          id="slider1"
-          type="range"
-          max={100}
-          min={0}
-          step={1}
-          value={settings.boost}
-          onChange={this.handleBoostChange}
-        />
-        <output id="range1">{settings.boost}</output>
+       <div className="settingsDivTitle">
+        <h2>{this.props.name}</h2>
+       </div>
+
+       <div className="settingsDivSlider">
+         <h3 className="settingSectionH">
+           <a href={this.props.displayInfo.gitLink} target="_blank">
+             <i className={iconGit}></i>
+           </a>
+           <i id="dl"
+              className={iconDownload}
+              onClick={this._download}
+              download="gradients.png">
+           </i>
+           <i className={iconPausePlay}
+              onClick={this._togglePlay}>
+           </i>
+           <i className={iconRefresh}
+              onClick={this._reset}>
+           </i>
+           <i className={iconClear}
+              onClick={this._clear}>
+           </i>
+           <i className={iconCompress}
+              onClick={this._collapse}>
+           </i>
+         </h3>
+       </div>
+
+       <div className="form">
+        <div className="settingsDivSlider">
+          <h3 className="settingSectionH">Acceleration</h3>
+          <input
+            id="slider1"
+            type="range"
+            max={100}
+            min={0}
+            step={1}
+            value={settings.boost}
+            onChange={this.handleBoostChange}
+          />
+          <output id="range">{settings.boost}</output>
+        </div>
+        <div className="settingsDivSlider">
+          <h3 className="settingSectionH">Color Increment</h3>
+          <input
+            id="slider2"
+            type="range"
+            max={1.00}
+            min={0.01}
+            step={0.01}
+            value={settings.increment}
+            onChange={this.handleIncrementChange}
+          />
+          <output id="range">{settings.increment}</output>
+        </div>
       </div>
-      <div className="formField">
-        <h3 className="settingSectionH">Color Increment</h3>
-        <input
-          id="slider2"
-          type="range"
-          max={1.00}
-          min={0.01}
-          step={0.01}
-          value={settings.increment}
-          onChange={this.handleIncrementChange}
-        />
-        <output id="range2">{settings.increment}</output>
-      </div>
-      </form>
-      </div>  : null;
+
+
+    </div>  : null;
+    //download, a pause/play, clear && reset
 
     return ( <div>
               <ReactCSSTransitionGroup
                      transitionName="settingsDiv"
-                     transitionEnterTimeout={550}
-                     transitionLeaveTimeout={550}
+                     transitionEnterTimeout={350}
+                     transitionLeaveTimeout={350}
                    >
                 {forms}
               </ReactCSSTransitionGroup>
@@ -219,6 +252,45 @@ var PlayGradients = React.createClass({
 
 
   //  return PlayDisplayAPI.renderDisplay(this.props);
+  },
+  /**
+   * download canvas as image
+   */
+  _download: function(){
+    var dataURL = canvas.toDataURL('image/png');
+    var link = document.createElement("a");
+    link.download = "canvas.png";
+    link.href = dataURL;
+    link.click();
+
+  },
+  /**
+   * call action to focus on this particular pane.
+   */
+  _reset: function(){
+    settings = PlayDisplayAPI.getSettingDefaults(this.props.id);
+    this.forceUpdate();
+  },
+  /**
+   * call action to focus on this particular pane.
+   */
+  _clear: function(){
+    ctx.clearRect(0, 0, width, height);
+    count = 0;
+    this.configureCanvas();
+  },
+  /**
+   * call action to focus on this particular pane.
+   */
+  _togglePlay: function(){
+    settings.playing = !settings.playing;
+    this.forceUpdate();
+  },
+  /**
+   * call action to focus on this particular pane.
+   */
+  _collapse: function(){
+    PlayActions.goSplitViewMode(this.props.id);
   }
 });
 
