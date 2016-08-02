@@ -162,6 +162,7 @@ var PlayGradients = React.createClass({
         break;//hopefully doesn't happen
     }
     var canvasJSX = PlayDisplayAPI.getCanvasDisplay(this.props);
+
     var iconGit = "fa fa-github fa-lg settingIcon" + this.props.focus;
     var iconDownload = "fa fa-download fa-lg settingIcon" + this.props.focus;
     var iconCompress = "fa fa-compress fa-lg settingIcon" + this.props.focus;
@@ -170,10 +171,7 @@ var PlayGradients = React.createClass({
     var iconRefresh = "fa fa-refresh fa-lg settingIcon" + this.props.focus;
     var iconClear = "fa fa-eraser fa-lg settingIcon" + this.props.focus;
 
-
-
-     var forms =
-     this.props.settingsVisible ?
+     var forms = this.props.settingsVisible ?
      <div className="settingsDiv">
        <div className="settingsDivTitle">
         <h2>{this.props.name}</h2>
@@ -184,11 +182,7 @@ var PlayGradients = React.createClass({
            <a href={this.props.displayInfo.gitLink} target="_blank">
              <i className={iconGit}></i>
            </a>
-           <i id="dl"
-              className={iconDownload}
-              onClick={this._download}
-              download="gradients.png">
-           </i>
+
            <i className={iconPausePlay}
               onClick={this._togglePlay}>
            </i>
@@ -201,6 +195,7 @@ var PlayGradients = React.createClass({
            <i className={iconCompress}
               onClick={this._collapse}>
            </i>
+
          </h3>
        </div>
 
@@ -232,8 +227,6 @@ var PlayGradients = React.createClass({
           <output id="range">{settings.increment}</output>
         </div>
       </div>
-
-
     </div>  : null;
     //download, a pause/play, clear && reset
 
@@ -262,7 +255,6 @@ var PlayGradients = React.createClass({
     link.download = "canvas.png";
     link.href = dataURL;
     link.click();
-
   },
   /**
    * call action to focus on this particular pane.

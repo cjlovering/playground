@@ -27,6 +27,17 @@ var PlayDisplayAPI = {
   getSettingDefaults: function(i){
     var settings;
     switch (i) {
+      case 2:
+        settings = {
+          rate:  250,
+          boardWidth: 30,
+          boardHeight: 20,
+          hexagonAngle: 30,
+          growth: 2,
+          overpopulation: 4,
+          starvation: 3
+        };
+        break;
       case 3:
         settings = {
           start: "0000FF",
@@ -39,10 +50,10 @@ var PlayDisplayAPI = {
         };
         break;
       default:
-
+        break;//no op
     }
     return settings;
-  }
+  },
 
 
 };
