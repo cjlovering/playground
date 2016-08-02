@@ -4,6 +4,7 @@ var $     = require('jquery'); //installed with node
 var PlayDisplayAPI = require('./PlayDisplayAPI');
 var PlayConstants = require('./../flux/constants/PlayConstants');
 var ReactCSSTransitionGroup = require('react-addons-css-transition-group');
+var PlayActions = require('./../flux/actions/PlayActions');
 
 //var InputRange =  require('react-input-range');
 
@@ -17,6 +18,7 @@ var seek = true;     //move away from
 var lagger = 0;
 var colorIndex = 0;
 var canvasWidth, canvasHeight, diagonal;
+var settingIconIndex = 0;
 
 //waiting on figuring out fix
 var settings =   {
@@ -303,62 +305,82 @@ var PlayStars = React.createClass({
   render: function() {
     var canvasJSX = PlayDisplayAPI.getCanvasDisplay(this.props);
 
-    // var settings = this.props.settingsVisible ?
-    //                 <div className="settingsDiv">
-    //                   <h3 className="settingsH"> settings!!! </h3>
-    //                   <input id="slider" type="range" min="1" max="100" step="1" value={star_num}/>
-	  //                   <span>{star_num}</span>
-    //                   <input id="slider2" type="range" min="0.0" max="1.0" step=".01" value={alpha}/>
-    //                   <span>{alpha}</span>
-    //
-    //                 </div> : null;
+    var iconGit = "fa fa-github fa-lg settingIcon" + this.props.focus;
+    var iconCompress = "fa fa-compress fa-lg settingIcon" + this.props.focus;
+    var iconRefresh = "fa fa-refresh fa-lg settingIcon" + this.props.focus;
 
-     var forms =
-     this.props.settingsVisible ?
-     <div className="settingsDiv">
-     <h2>{this.props.name}</h2>
-     <form className="form">
-      <div className="formField">
-        <h3 className="settingSectionH">Star Count</h3>
-        <input
-          id="slider1"
-          type="range"
-          max={1000}
-          min={0}
-          step={25}
-          value={settings.starNum}
-          onChange={this.handleStarNumChange}
-        />
-        <output id="range1">{settings.starNum}</output>
+    var iconSetting = settingIconIndex == 0 ? "fa fa-plane fa-lg settingIcon" + this.props.focus :
+                      settingIconIndex == 1 ? "fa fa-truck fa-lg settingIcon" + this.props.focus :
+                                              "fa fa-fighter-jet fa-lg settingIcon" + this.props.focus
+
+    var forms = this.props.settingsVisible ?
+    <div className="settingsDiv">
+      <div className="settingsDivTitle">
+       <h2>{this.props.name}</h2>
       </div>
-      <div className="formField">
-        <h3 className="settingSectionH">Velocity</h3>
-        <input
-          id="slider2"
-          type="range"
-          max={2.00}
-          min={0.01}
-          step={0.01}
-          value={settings.alpha}
-          onChange={this.handleAlphaChange}
-        />
-        <output id="range1">{settings.alpha}</output>
+
+      <div className="settingsDivSlider">
+        <h3 className="settingSectionH">
+          <a href={this.props.displayInfo.gitLink} target="_blank">
+            <i className={iconGit}></i>
+          </a>
+
+          <i className={iconRefresh}
+             onClick={this._reset}>
+          </i>
+          <i className={iconSetting}
+             onClick={this._nextSetting}>
+          </i>
+          <i className={iconCompress}
+             onClick={this._collapse}>
+          </i>
+
+        </h3>
       </div>
-      <div className="formField">
-        <h3 className="settingSectionH">Star Size</h3>
-        <input
-          id="slider4"
-          type="range"
-          max={300}
-          min={1}
-          step={1}
-          value={settings.baseSize}
-          onChange={this.handleBaseSizeChange}
-        />
-        <output id="range1">{settings.baseSize}</output>
-      </div>
-      </form>
-      </div>  : null;
+
+      <div className="form">
+       <div className="settingsDivSlider">
+         <h3 className="settingSectionH">Star Count</h3>
+         <input
+           id="slider1"
+           type="range"
+           max={1000}
+           min={0}
+           step={25}
+           value={settings.starNum}
+           onChange={this.handleStarNumChange}
+         />
+         <output id="range1">{settings.starNum}</output>
+       </div>
+       <div className="settingsDivSlider">
+         <h3 className="settingSectionH">Velocity</h3>
+         <input
+           id="slider2"
+           type="range"
+           max={2.00}
+           min={0.01}
+           step={0.01}
+           value={settings.alpha}
+           onChange={this.handleAlphaChange}
+         />
+         <output id="range1">{settings.alpha}</output>
+       </div>
+       <div className="settingsDivSlider">
+         <h3 className="settingSectionH">Star Size</h3>
+         <input
+           id="slider4"
+           type="range"
+           max={300}
+           min={1}
+           step={1}
+           value={settings.baseSize}
+           onChange={this.handleBaseSizeChange}
+         />
+         <output id="range1">{settings.baseSize}</output>
+       </div>
+     </div>
+   </div>  : null;
+
 
     return ( <div>
               <ReactCSSTransitionGroup
@@ -393,7 +415,28 @@ var PlayStars = React.createClass({
   handleBaseSizeChange: function( e ) {
     settings.baseSize = e.target.value;
     this.forceUpdate();
-  }
+  },
+  /**
+   * call action to focus on this particular pane.
+   */
+  _reset: function(){
+    settings = PlayDisplayAPI.getSettingDefaults(this.props.id);
+    this.forceUpdate();
+  },
+  /**
+   * call action to focus on this particular pane.
+   */
+  _collapse: function(){
+    PlayActions.goSplitViewMode(this.props.id);
+  },
+  /**
+   * call action to focus on this particular pane.
+   */
+  _nextSetting: function(){
+    settingIconIndex = settingIconIndex == 0 ? 1 : settingIconIndex == 1 ? 2 : 0;
+    settings = PlayDisplayAPI.getSettingDefaults(this.props.id, settingIconIndex);
+    this.forceUpdate();
+  },
 
 });
 module.exports = PlayStars;

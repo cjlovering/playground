@@ -32361,9 +32361,46 @@ var PlayDisplayAPI = {
     var c = this.getCanvasDisplay(props);
     return c;
   },
-  getSettingDefaults: function (i) {
+  getSettingDefaults: function (i, j) {
     var settings;
     switch (i) {
+      case 0:
+        //stars
+        switch (j) {
+          case 0:
+            settings = {
+              starNum: 100,
+              alpha: 0.5,
+              baseSize: 25,
+              explode: 4,
+              escapeThresh: 35,
+              swarmThreshold: 3
+            };
+            break;
+          case 1:
+            settings = {
+              starNum: 100,
+              alpha: 0.15,
+              baseSize: 240,
+              explode: 4,
+              escapeThresh: 35,
+              swarmThreshold: 3
+            };
+            break;
+          case 2:
+            settings = {
+              starNum: 250,
+              alpha: 1.50,
+              baseSize: 20,
+              explode: 4,
+              escapeThresh: 35,
+              swarmThreshold: 3
+            };
+            break;
+          default:
+          //no op
+        }
+        break;
       case 2:
         settings = {
           rate: 200,
@@ -34003,6 +34040,7 @@ var $ = require('jquery'); //installed with node
 var PlayDisplayAPI = require('./PlayDisplayAPI');
 var PlayConstants = require('./../flux/constants/PlayConstants');
 var ReactCSSTransitionGroup = require('react-addons-css-transition-group');
+var PlayActions = require('./../flux/actions/PlayActions');
 
 //var InputRange =  require('react-input-range');
 
@@ -34016,6 +34054,7 @@ var seek = true; //move away from
 var lagger = 0;
 var colorIndex = 0;
 var canvasWidth, canvasHeight, diagonal;
+var settingIconIndex = 0;
 
 //waiting on figuring out fix
 var settings = {
@@ -34294,30 +34333,49 @@ var PlayStars = React.createClass({
   render: function () {
     var canvasJSX = PlayDisplayAPI.getCanvasDisplay(this.props);
 
-    // var settings = this.props.settingsVisible ?
-    //                 <div className="settingsDiv">
-    //                   <h3 className="settingsH"> settings!!! </h3>
-    //                   <input id="slider" type="range" min="1" max="100" step="1" value={star_num}/>
-    //                   <span>{star_num}</span>
-    //                   <input id="slider2" type="range" min="0.0" max="1.0" step=".01" value={alpha}/>
-    //                   <span>{alpha}</span>
-    //
-    //                 </div> : null;
+    var iconGit = "fa fa-github fa-lg settingIcon" + this.props.focus;
+    var iconCompress = "fa fa-compress fa-lg settingIcon" + this.props.focus;
+    var iconRefresh = "fa fa-refresh fa-lg settingIcon" + this.props.focus;
+
+    var iconSetting = settingIconIndex == 0 ? "fa fa-plane fa-lg settingIcon" + this.props.focus : settingIconIndex == 1 ? "fa fa-truck fa-lg settingIcon" + this.props.focus : "fa fa-fighter-jet fa-lg settingIcon" + this.props.focus;
 
     var forms = this.props.settingsVisible ? React.createElement(
       'div',
       { className: 'settingsDiv' },
       React.createElement(
-        'h2',
-        null,
-        this.props.name
+        'div',
+        { className: 'settingsDivTitle' },
+        React.createElement(
+          'h2',
+          null,
+          this.props.name
+        )
       ),
       React.createElement(
-        'form',
+        'div',
+        { className: 'settingsDivSlider' },
+        React.createElement(
+          'h3',
+          { className: 'settingSectionH' },
+          React.createElement(
+            'a',
+            { href: this.props.displayInfo.gitLink, target: '_blank' },
+            React.createElement('i', { className: iconGit })
+          ),
+          React.createElement('i', { className: iconRefresh,
+            onClick: this._reset }),
+          React.createElement('i', { className: iconSetting,
+            onClick: this._nextSetting }),
+          React.createElement('i', { className: iconCompress,
+            onClick: this._collapse })
+        )
+      ),
+      React.createElement(
+        'div',
         { className: 'form' },
         React.createElement(
           'div',
-          { className: 'formField' },
+          { className: 'settingsDivSlider' },
           React.createElement(
             'h3',
             { className: 'settingSectionH' },
@@ -34340,7 +34398,7 @@ var PlayStars = React.createClass({
         ),
         React.createElement(
           'div',
-          { className: 'formField' },
+          { className: 'settingsDivSlider' },
           React.createElement(
             'h3',
             { className: 'settingSectionH' },
@@ -34363,7 +34421,7 @@ var PlayStars = React.createClass({
         ),
         React.createElement(
           'div',
-          { className: 'formField' },
+          { className: 'settingsDivSlider' },
           React.createElement(
             'h3',
             { className: 'settingSectionH' },
@@ -34422,13 +34480,34 @@ var PlayStars = React.createClass({
   handleBaseSizeChange: function (e) {
     settings.baseSize = e.target.value;
     this.forceUpdate();
+  },
+  /**
+   * call action to focus on this particular pane.
+   */
+  _reset: function () {
+    settings = PlayDisplayAPI.getSettingDefaults(this.props.id);
+    this.forceUpdate();
+  },
+  /**
+   * call action to focus on this particular pane.
+   */
+  _collapse: function () {
+    PlayActions.goSplitViewMode(this.props.id);
+  },
+  /**
+   * call action to focus on this particular pane.
+   */
+  _nextSetting: function () {
+    settingIconIndex = settingIconIndex == 0 ? 1 : settingIconIndex == 1 ? 2 : 0;
+    settings = PlayDisplayAPI.getSettingDefaults(this.props.id, settingIconIndex);
+    this.forceUpdate();
   }
 
 });
 module.exports = PlayStars;
 
 
-},{"./../flux/constants/PlayConstants":199,"./PlayDisplayAPI":193,"jquery":33,"react":185,"react-addons-css-transition-group":37}],198:[function(require,module,exports){
+},{"./../flux/actions/PlayActions":198,"./../flux/constants/PlayConstants":199,"./PlayDisplayAPI":193,"jquery":33,"react":185,"react-addons-css-transition-group":37}],198:[function(require,module,exports){
 
 var AppDispatcher = require('./../dispatcher/AppDispatcher');
 var PlayConstants = require('./../constants/PlayConstants');

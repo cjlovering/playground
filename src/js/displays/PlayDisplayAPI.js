@@ -24,9 +24,46 @@ var PlayDisplayAPI = {
     var c = this.getCanvasDisplay(props);
     return ( c );
   },
-  getSettingDefaults: function(i){
+  getSettingDefaults: function(i, j){
     var settings;
     switch (i) {
+      case 0:
+        //stars
+        switch (j) {
+          case 0:
+            settings =   {
+              starNum: 100,
+              alpha: 0.5,
+              baseSize: 25,
+              explode: 4,
+              escapeThresh: 35,
+              swarmThreshold: 3
+            };
+            break;
+          case 1:
+            settings =   {
+              starNum: 100,
+              alpha: 0.15,
+              baseSize: 240,
+              explode: 4,
+              escapeThresh: 35,
+              swarmThreshold: 3
+            };
+            break;
+          case 2:
+            settings =   {
+              starNum: 250,
+              alpha: 1.50,
+              baseSize: 20,
+              explode: 4,
+              escapeThresh: 35,
+              swarmThreshold: 3
+            };
+            break;
+          default:
+            //no op
+        }
+        break;
       case 2:
         settings = {
           rate:  200,
