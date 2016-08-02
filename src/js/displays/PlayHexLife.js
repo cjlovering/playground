@@ -21,20 +21,21 @@ var hexHeight,
     hexRectangleHeight,
     hexRectangleWidth,
     hexagonAngle = 0.523598776, // 30 degrees in radians
-    sideLength,
-    boardWidth = 30,  //75
-    boardHeight = 20; //75
-
-var cells = createCellArray();
+    sideLength;
 
 var keepCurrentSettings = true;//false
 
-var tempSettings = {
-  overpopulation: 4,
-  starvation: 2,
-  growth: 3
-}
+// var tempSettings = {
+//   overpopulation: 4,
+//   starvation: 2,
+//   growth: 3
+// }
 
+// var tempSettings = {
+//   overpopulation: 5,
+//   starvation: 2,
+//   growth: 1
+// }
 var tempSettings = {
   overpopulation: 5,
   starvation: 2,
@@ -42,14 +43,16 @@ var tempSettings = {
 }
 
 var settings = {
-  rate:  250,
-  boardWidth: 30,
-  boardHeight: 20,
+  rate:  200,
+  boardWidth: 100,
+  boardHeight: 75,
   hexagonAngle: 30,
   overpopulation: 5,
   starvation: 2,
   growth: 1
 }
+
+var cells = createCellArray();
 
 //hex class
 function Hexagon(x,y) {
@@ -87,7 +90,7 @@ function Hexagon(x,y) {
 
 
         for (var i = 0; i < test.length; i++){
-            if ( this.x + test[i][0] >= 0 && this.x + test[i][0] < boardWidth && this.y + test[i][1] >= 0 && this.y + test[i][1] < boardHeight )
+            if ( this.x + test[i][0] >= 0 && this.x + test[i][0] < settings.boardWidth && this.y + test[i][1] >= 0 && this.y + test[i][1] < settings.boardHeight )
             {
                 if (cells[ this.x + test[i][0] ][ this.y + test[i][1] ].Alive()) n += 1;
             }
@@ -119,7 +122,7 @@ function Rules(n, l){
         if (n >= settings.overpopulation || n <= settings.starvation) return false;
         else return true;
     }
-    else if (n >= settings.growth) return true;
+    else if (n == settings.growth) return true;
 
 }
 /* no change */
@@ -191,43 +194,49 @@ function inject(eventInfo){
     }
 
     for (i = 0; i < test2.length; i++){
-        if ( xx + test2[i][0] >= 0 && xx + test2[i][0] < boardWidth && yy + test2[i][1] >= 0 && yy + test2[i][1] < boardHeight )
+        if ( xx + test2[i][0] >= 0 && xx + test2[i][0] < settings.boardWidth && yy + test2[i][1] >= 0 && yy + test2[i][1] < settings.boardHeight )
         {
             cells[ xx + test2[i][0] ][ yy + test2[i][1] ].Kill();
         }
     }
 
     for (i = 0; i < test.length; i++){
-        if ((xx + test[i][0] >= 0 && xx + test[i][0] < boardWidth) && ( yy + test[i][1] >= 0 && yy + test[i][1] < boardHeight))
+        if ((xx + test[i][0] >= 0 && xx + test[i][0] < settings.boardWidth) && ( yy + test[i][1] >= 0 && yy + test[i][1] < settings.boardHeight))
             {
                 cells[xx + test[i][0]][yy + test[i][1]].Live();
             }
     }
 
     //ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawBoard(ctx, boardWidth, boardHeight);
+    drawBoard(ctx, settings.boardWidth, settings.boardHeight);
 }
 //intial set-up
 function createCellArray(){
     var arr = [];
-    for ( var i = 0; i < boardWidth; i++) arr[i] = []
+    for ( var i = 0; i < settings.boardWidth; i++) arr[i] = []
     return arr;
 }
 
 function populateCellArray(){
-    for ( var i = 0; i < boardWidth; i++)
-        for ( var j = 0; j < boardHeight; j++)
+    for ( var i = 0; i < settings.boardWidth; i++)
+        for ( var j = 0; j < settings.boardHeight; j++)
             cells[i][j] = new Hexagon(i,j);
 }
 
 
 function onResizeDraw(){
 
-    ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  cells = [];
+  cells = createCellArray();
+  populateCellArray();
 
-    configureHexagonParameters();
-    drawBoard(ctx, boardWidth, boardHeight);
+
+  ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  configureHexagonParameters();
+  drawBoard(ctx, settings.boardWidth, settings.boardHeight);
+
 }
 
 function mouseMoveResponse(eventInfo){
@@ -245,7 +254,7 @@ function mouseMoveResponse(eventInfo){
     hexY = Math.floor(y / (hexHeight + sideLength));
     hexX = Math.floor((x - (hexY % 2) * hexRadius) / hexRectangleWidth);
 
-   if((hexX >= 0 && hexX < boardWidth) && (hexY >= 0 && hexY < boardHeight)) {
+   if((hexX >= 0 && hexX < settings.boardWidth) && (hexY >= 0 && hexY < settings.boardHeight)) {
         if(currentHex != cells[hexX][hexY]){
             currentHex = cells[hexX][hexY];
             currentHex.Live();
@@ -309,7 +318,7 @@ function drawHexagon(canvasContext, x, y) {
 }
 
 function configureHexagonParameters(){
-    sideLength = canvas.height > canvas.width ? canvas.height / boardHeight : canvas.width / boardWidth ;
+    sideLength = canvas.height > canvas.width ? canvas.height / settings.boardHeight : canvas.width / settings.boardWidth ;
     hexHeight = Math.sin(hexagonAngle) * sideLength;
     hexRadius = Math.cos(hexagonAngle) * sideLength;
     hexRectangleHeight = sideLength + 2 * hexHeight;
@@ -321,13 +330,13 @@ function loop(){
         requestAnimationFrame(loop);
         // Drawing code goes here
 
-        for ( var i = 0; i < boardWidth; i++)
-          for ( var j = 0; j < boardHeight; j++){
+        for ( var i = 0; i < settings.boardWidth; i++)
+          for ( var j = 0; j < settings.boardHeight; j++){
             cells[i][j].Play();
           }
 
         //ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawBoard(ctx, boardWidth, boardHeight);
+        drawBoard(ctx, settings.boardWidth, settings.boardHeight);
 
     }, settings.rate);
 }
@@ -343,7 +352,7 @@ var PlayHexLife = React.createClass({
         ctx = canvas.getContext('2d');
 
         populateCellArray();
-        drawBoard(ctx, boardWidth, boardHeight);
+        drawBoard(ctx, settings.boardWidth, settings.boardHeight);
 
         //this makes the assumption that mouse move was the last event
         //as in, mouse up and then mouse up won't happen
@@ -481,13 +490,39 @@ var PlayHexLife = React.createClass({
            <input
              id="slider4"
              type="range"
-             max={10000}
+             max={1000}
              min={0}
-             step={500}
+             step={10}
              value={settings.rate}
              onChange={this.handleRateChange}
            />
-           <output id="range">{settings.rate}</output>
+           <output id="range">{settings.rate / 1000}</output>
+         </div>
+         <div className="settingsDivSlider">
+           <h3 className="settingSectionH">height</h3>
+           <input
+             id="slider4"
+             type="range"
+             max={200}
+             min={0}
+             step={1}
+             value={settings.boardHeight}
+             onChange={this.handleBoardheightChange}
+           />
+           <output id="range">{settings.boardHeight}</output>
+         </div>
+         <div className="settingsDivSlider">
+           <h3 className="settingSectionH">width</h3>
+           <input
+             id="slider4"
+             type="range"
+             max={200}
+             min={0}
+             step={1}
+             value={settings.boardWidth}
+             onChange={this.handleBoardwidthChange}
+           />
+           <output id="range">{settings.boardWidth}</output>
          </div>
        </div>
 
@@ -553,7 +588,34 @@ var PlayHexLife = React.createClass({
       settings.rate = e.target.value;
       tempSettings.rate = e.target.value;
       this.forceUpdate();
-    }
+    },
+    /**
+     * boardWidth setting needs to be updated
+     */
+    handleBoardwidthChange: function( e ) {
+
+      clearTimeout(resizeId);
+      resizeId = setTimeout(function(o){
+        settings.boardWidth = o.val;
+        onResizeDraw();
+        o.r.forceUpdate();
+      }, 100, { val: e.target.value, r: this} );
+
+    },
+    /**
+     * boardHeight setting needs to be updated
+     */
+    handleBoardheightChange: function( e ) {
+
+      clearTimeout(resizeId);
+      resizeId = setTimeout(function(o){
+        settings.boardHeight = o.val;
+        onResizeDraw();
+        o.r.forceUpdate();
+      }, 100, { val: e.target.value, r: this});
+
+
+    },
 });
 
 module.exports = PlayHexLife;

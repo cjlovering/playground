@@ -31988,7 +31988,8 @@ var PlayFullView = React.createClass({
   displayName: 'PlayFullView',
 
   componentWillMount: function () {
-    this.setState({ "settingsVisible": false });
+    //when it first mounts, check to see if it should be opened by a cog click
+    this.setState({ "settingsVisible": this.props.settingsOpen });
   },
   render: function () {
     Display = PlayStore.getDisplayModule(this.props.id);
@@ -32021,13 +32022,6 @@ var PlayFullView = React.createClass({
         settingsVisible: this.state.settingsVisible })
     );
   },
-  //  <ReactCSSTransitionGroup
-  //           transitionName="noteTransition"
-  //           transitionEnterTimeout={550}
-  //           transitionLeaveTimeout={550}
-  //         >
-  //    {note}
-  //    </ReactCSSTransitionGroup>
 
   /**
    * if mouse moves in the top 15% of the page, pull down menu
@@ -32037,9 +32031,13 @@ var PlayFullView = React.createClass({
     var x = e.nativeEvent.x;
     var w = window.innerWidth;
 
-    if (!this.state.settingsVisible && x < 0.10 * w) {
+    if (!this.state.settingsVisible && x < 0.10 * w || this.props.settingsOpen) {
       this.setState({ "settingsVisible": true });
+      if (x < 0.10 * w) {
+        PlayActions.setSettingsOpen(false);
+      }
     } else if (this.state.settingsVisible && x > 0.25 * w) {
+
       this.setState({ "settingsVisible": false });
     }
   }
@@ -32071,7 +32069,8 @@ function getPlayState() {
     scriptData: PlayStore.getScriptInfo(),
     sizing: PlayStore.getSizingInfo(),
     viewMode: PlayStore.getViewMode(),
-    displayIndex: PlayStore.getDisplayIndex()
+    displayIndex: PlayStore.getDisplayIndex(),
+    settingsOpen: PlayStore.getSettingsOpen()
   };
 }
 
@@ -32133,7 +32132,8 @@ var PlayGround = React.createClass({
           id: this.state.displayIndex,
           displayInfo: this.state.scriptData[this.state.displayIndex],
           sizing: this.state.sizing,
-          viewMode: this.props.viewMode });
+          viewMode: this.props.viewMode,
+          settingsOpen: this.state.settingsOpen });
         break;
       default:
         value = null;
@@ -32197,7 +32197,8 @@ var PlayPane = React.createClass({
         viewMode: this.props.viewMode,
         play: 'true' }),
       React.createElement(PlayViewLabel, { gitLink: this.props.displayInfo.gitLink,
-        fullScreenEvent: this._onDoubleClick,
+        fullScreenEvent: this._goFullViewMode,
+        openSettingsView: this._openSettingsView,
         focus: focus,
         name: this.props.displayInfo.name,
         description: this.props.displayInfo.text })
@@ -32220,9 +32221,17 @@ var PlayPane = React.createClass({
    * go full view mode on this index. really the index
    * isn't needed, but whatever for now.
    */
-  _onDoubleClick: function () {
+  _goFullViewMode: function () {
+    PlayActions.goFullViewMode(this.props.id);
+  },
+  /**
+   * go full view and open settings
+   */
+  _openSettingsView: function () {
+    PlayActions.setSettingsOpen(true);
     PlayActions.goFullViewMode(this.props.id);
   }
+
 });
 
 module.exports = PlayPane;
@@ -32297,6 +32306,7 @@ var PlayViewLabel = React.createClass({
     var styleName = "playViewLabelDiv" + this.props.focus;
     var iconClassNameGit = "fa fa-github fa-lg" + this.props.focus;
     var iconClassNameExpand = "fa fa-expand fa-lg" + this.props.focus;
+    var iconCogs = "fa fa-cogs fa-lg" + this.props.focus;
 
     return React.createElement(
       'div',
@@ -32309,6 +32319,8 @@ var PlayViewLabel = React.createClass({
       React.createElement(
         'span',
         null,
+        React.createElement('i', { className: iconCogs,
+          onClick: this.props.openSettingsView }),
         React.createElement(
           'a',
           { href: this.props.gitLink, target: '_blank' },
@@ -32354,13 +32366,13 @@ var PlayDisplayAPI = {
     switch (i) {
       case 2:
         settings = {
-          rate: 250,
-          boardWidth: 30,
-          boardHeight: 20,
+          rate: 200,
+          boardWidth: 100,
+          boardHeight: 75,
           hexagonAngle: 30,
-          growth: 2,
           overpopulation: 4,
-          starvation: 3
+          starvation: 1,
+          growth: 3
         };
         break;
       case 3:
@@ -32986,21 +32998,21 @@ var hexHeight,
     hexRectangleWidth,
     hexagonAngle = 0.523598776,
     // 30 degrees in radians
-sideLength,
-    boardWidth = 30,
-    //75
-boardHeight = 20; //75
-
-var cells = createCellArray();
+sideLength;
 
 var keepCurrentSettings = true; //false
 
-var tempSettings = {
-    overpopulation: 4,
-    starvation: 2,
-    growth: 3
-};
+// var tempSettings = {
+//   overpopulation: 4,
+//   starvation: 2,
+//   growth: 3
+// }
 
+// var tempSettings = {
+//   overpopulation: 5,
+//   starvation: 2,
+//   growth: 1
+// }
 var tempSettings = {
     overpopulation: 5,
     starvation: 2,
@@ -33008,14 +33020,16 @@ var tempSettings = {
 };
 
 var settings = {
-    rate: 250,
-    boardWidth: 30,
-    boardHeight: 20,
+    rate: 200,
+    boardWidth: 100,
+    boardHeight: 75,
     hexagonAngle: 30,
     overpopulation: 5,
     starvation: 2,
     growth: 1
 };
+
+var cells = createCellArray();
 
 //hex class
 function Hexagon(x, y) {
@@ -33057,7 +33071,7 @@ function Hexagon(x, y) {
         }
 
         for (var i = 0; i < test.length; i++) {
-            if (this.x + test[i][0] >= 0 && this.x + test[i][0] < boardWidth && this.y + test[i][1] >= 0 && this.y + test[i][1] < boardHeight) {
+            if (this.x + test[i][0] >= 0 && this.x + test[i][0] < settings.boardWidth && this.y + test[i][1] >= 0 && this.y + test[i][1] < settings.boardHeight) {
                 if (cells[this.x + test[i][0]][this.y + test[i][1]].Alive()) n += 1;
             }
         }
@@ -33084,7 +33098,7 @@ function Rules(n, l) {
 
     if (l) {
         if (n >= settings.overpopulation || n <= settings.starvation) return false;else return true;
-    } else if (n >= settings.growth) return true;
+    } else if (n == settings.growth) return true;
 }
 /* no change */
 function SetA(n, l) {
@@ -33132,38 +33146,42 @@ function inject(eventInfo) {
     }
 
     for (i = 0; i < test2.length; i++) {
-        if (xx + test2[i][0] >= 0 && xx + test2[i][0] < boardWidth && yy + test2[i][1] >= 0 && yy + test2[i][1] < boardHeight) {
+        if (xx + test2[i][0] >= 0 && xx + test2[i][0] < settings.boardWidth && yy + test2[i][1] >= 0 && yy + test2[i][1] < settings.boardHeight) {
             cells[xx + test2[i][0]][yy + test2[i][1]].Kill();
         }
     }
 
     for (i = 0; i < test.length; i++) {
-        if (xx + test[i][0] >= 0 && xx + test[i][0] < boardWidth && yy + test[i][1] >= 0 && yy + test[i][1] < boardHeight) {
+        if (xx + test[i][0] >= 0 && xx + test[i][0] < settings.boardWidth && yy + test[i][1] >= 0 && yy + test[i][1] < settings.boardHeight) {
             cells[xx + test[i][0]][yy + test[i][1]].Live();
         }
     }
 
     //ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawBoard(ctx, boardWidth, boardHeight);
+    drawBoard(ctx, settings.boardWidth, settings.boardHeight);
 }
 //intial set-up
 function createCellArray() {
     var arr = [];
-    for (var i = 0; i < boardWidth; i++) arr[i] = [];
+    for (var i = 0; i < settings.boardWidth; i++) arr[i] = [];
     return arr;
 }
 
 function populateCellArray() {
-    for (var i = 0; i < boardWidth; i++) for (var j = 0; j < boardHeight; j++) cells[i][j] = new Hexagon(i, j);
+    for (var i = 0; i < settings.boardWidth; i++) for (var j = 0; j < settings.boardHeight; j++) cells[i][j] = new Hexagon(i, j);
 }
 
 function onResizeDraw() {
+
+    cells = [];
+    cells = createCellArray();
+    populateCellArray();
 
     ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     configureHexagonParameters();
-    drawBoard(ctx, boardWidth, boardHeight);
+    drawBoard(ctx, settings.boardWidth, settings.boardHeight);
 }
 
 function mouseMoveResponse(eventInfo) {
@@ -33176,7 +33194,7 @@ function mouseMoveResponse(eventInfo) {
     hexY = Math.floor(y / (hexHeight + sideLength));
     hexX = Math.floor((x - hexY % 2 * hexRadius) / hexRectangleWidth);
 
-    if (hexX >= 0 && hexX < boardWidth && hexY >= 0 && hexY < boardHeight) {
+    if (hexX >= 0 && hexX < settings.boardWidth && hexY >= 0 && hexY < settings.boardHeight) {
         if (currentHex != cells[hexX][hexY]) {
             currentHex = cells[hexX][hexY];
             currentHex.Live();
@@ -33239,7 +33257,7 @@ function drawHexagon(canvasContext, x, y) {
 }
 
 function configureHexagonParameters() {
-    sideLength = canvas.height > canvas.width ? canvas.height / boardHeight : canvas.width / boardWidth;
+    sideLength = canvas.height > canvas.width ? canvas.height / settings.boardHeight : canvas.width / settings.boardWidth;
     hexHeight = Math.sin(hexagonAngle) * sideLength;
     hexRadius = Math.cos(hexagonAngle) * sideLength;
     hexRectangleHeight = sideLength + 2 * hexHeight;
@@ -33251,12 +33269,12 @@ function loop() {
         requestAnimationFrame(loop);
         // Drawing code goes here
 
-        for (var i = 0; i < boardWidth; i++) for (var j = 0; j < boardHeight; j++) {
+        for (var i = 0; i < settings.boardWidth; i++) for (var j = 0; j < settings.boardHeight; j++) {
             cells[i][j].Play();
         }
 
         //ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawBoard(ctx, boardWidth, boardHeight);
+        drawBoard(ctx, settings.boardWidth, settings.boardHeight);
     }, settings.rate);
 }
 
@@ -33273,7 +33291,7 @@ var PlayHexLife = React.createClass({
             ctx = canvas.getContext('2d');
 
             populateCellArray();
-            drawBoard(ctx, boardWidth, boardHeight);
+            drawBoard(ctx, settings.boardWidth, settings.boardHeight);
 
             //this makes the assumption that mouse move was the last event
             //as in, mouse up and then mouse up won't happen
@@ -33455,16 +33473,62 @@ var PlayHexLife = React.createClass({
                     React.createElement('input', {
                         id: 'slider4',
                         type: 'range',
-                        max: 10000,
+                        max: 1000,
                         min: 0,
-                        step: 500,
+                        step: 10,
                         value: settings.rate,
                         onChange: this.handleRateChange
                     }),
                     React.createElement(
                         'output',
                         { id: 'range' },
-                        settings.rate
+                        settings.rate / 1000
+                    )
+                ),
+                React.createElement(
+                    'div',
+                    { className: 'settingsDivSlider' },
+                    React.createElement(
+                        'h3',
+                        { className: 'settingSectionH' },
+                        'height'
+                    ),
+                    React.createElement('input', {
+                        id: 'slider4',
+                        type: 'range',
+                        max: 200,
+                        min: 0,
+                        step: 1,
+                        value: settings.boardHeight,
+                        onChange: this.handleBoardheightChange
+                    }),
+                    React.createElement(
+                        'output',
+                        { id: 'range' },
+                        settings.boardHeight
+                    )
+                ),
+                React.createElement(
+                    'div',
+                    { className: 'settingsDivSlider' },
+                    React.createElement(
+                        'h3',
+                        { className: 'settingSectionH' },
+                        'width'
+                    ),
+                    React.createElement('input', {
+                        id: 'slider4',
+                        type: 'range',
+                        max: 200,
+                        min: 0,
+                        step: 1,
+                        value: settings.boardWidth,
+                        onChange: this.handleBoardwidthChange
+                    }),
+                    React.createElement(
+                        'output',
+                        { id: 'range' },
+                        settings.boardWidth
                     )
                 )
             )
@@ -33529,6 +33593,30 @@ var PlayHexLife = React.createClass({
         settings.rate = e.target.value;
         tempSettings.rate = e.target.value;
         this.forceUpdate();
+    },
+    /**
+     * boardWidth setting needs to be updated
+     */
+    handleBoardwidthChange: function (e) {
+
+        clearTimeout(resizeId);
+        resizeId = setTimeout(function (o) {
+            settings.boardWidth = o.val;
+            onResizeDraw();
+            o.r.forceUpdate();
+        }, 100, { val: e.target.value, r: this });
+    },
+    /**
+     * boardHeight setting needs to be updated
+     */
+    handleBoardheightChange: function (e) {
+
+        clearTimeout(resizeId);
+        resizeId = setTimeout(function (o) {
+            settings.boardHeight = o.val;
+            onResizeDraw();
+            o.r.forceUpdate();
+        }, 100, { val: e.target.value, r: this });
     }
 });
 
@@ -34367,6 +34455,15 @@ var PlayActions = {
   /**
    * @param  {number} index
    */
+  setSettingsOpen: function (bool) {
+    AppDispatcher.dispatch({
+      actionType: PlayConstants.PLAY_SETTING_SCREEN,
+      val: bool
+    });
+  },
+  /**
+   * @param  {number} index
+   */
   goSplitViewMode: function (index) {
     AppDispatcher.dispatch({
       actionType: PlayConstants.PLAY_SPLIT_SCREEN,
@@ -34401,7 +34498,7 @@ var PlayConstants = keyMirror({
   PLAY_PLAY_STOP_ALL_BUT: null,
   PLAY_FOCUS_INDEX: null,
   PLAY_DESTROY: null,
-  PLAY_FOCUS_SCREEN: null,
+  PLAY_SETTING_SCREEN: null,
   PLAY_FULL_SCREEN: null,
   PLAY_SPLIT_SCREEN: null,
   PLAY_RESET: null,
@@ -34485,6 +34582,10 @@ var sizing = {
  */
 var displayIndex = -1;
 
+function setDisplayIndex(index) {
+  displayIndex = index;
+}
+
 /**
  * index of view
  * (I am using PlayConstants for multiple things, but i think the meaning is
@@ -34492,9 +34593,7 @@ var displayIndex = -1;
  */
 var viewMode = PlayConstants.PLAY_SPLIT_SCREEN;
 
-function setDisplayIndex(index) {
-  displayIndex = index;
-}
+var forceSettingsOpen = false;
 
 /**
  * TODO: double check this
@@ -34541,6 +34640,18 @@ var PlayStore = assign({}, EventEmitter.prototype, {
   getPlayViewStyleName: function (index) {
 
     return viewMode == PlayConstants.PLAY_SPLIT_SCREEN ? index == 0 ? "playViewLeftEdge" : index == 3 ? "playViewRightEdge" : "playView" : "playView";
+  },
+
+  /**
+   *  sets the value of forceSettingsOpen, so that when the viewMode
+   *  is switched, the settings are appopriately open to begin with.
+   *  @return {string}
+   */
+  setSettingsOpen: function (val) {
+    forceSettingsOpen = val;
+  },
+  getSettingsOpen: function () {
+    return forceSettingsOpen;
   },
 
   /**
@@ -34623,6 +34734,12 @@ AppDispatcher.register(function (action) {
         setDisplayIndex(action.id);
         setSizingSplit();
         PlayStore.setViewMode(action.actionType);
+        PlayStore.emitChange();
+      }
+      break;
+    case PlayConstants.PLAY_SETTING_SCREEN:
+      if (action.actionType !== forceSettingsOpen) {
+        PlayStore.setSettingsOpen(action.val);
         PlayStore.emitChange();
       }
       break;

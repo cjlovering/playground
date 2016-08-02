@@ -24,6 +24,15 @@ var PlayActions = {
   /**
    * @param  {number} index
    */
+  setSettingsOpen: function(bool) {
+    AppDispatcher.dispatch({
+      actionType: PlayConstants.PLAY_SETTING_SCREEN,
+      val: bool
+    });
+  },
+  /**
+   * @param  {number} index
+   */
   goSplitViewMode: function(index) {
     AppDispatcher.dispatch({
       actionType: PlayConstants.PLAY_SPLIT_SCREEN,

@@ -6,7 +6,7 @@ var PlayViewLabel = React.createClass({
     var styleName = "playViewLabelDiv" + this.props.focus;
     var iconClassNameGit = "fa fa-github fa-lg" + this.props.focus;
     var iconClassNameExpand = "fa fa-expand fa-lg" + this.props.focus;
-
+    var iconCogs = "fa fa-cogs fa-lg" + this.props.focus;
 
 
     return (
@@ -15,6 +15,9 @@ var PlayViewLabel = React.createClass({
           {label}
         </span>
         <span>
+          <i className={iconCogs}
+             onClick={this.props.openSettingsView}>
+          </i>
           <a href={this.props.gitLink} target="_blank">
             <i className={iconClassNameGit}></i>
           </a>

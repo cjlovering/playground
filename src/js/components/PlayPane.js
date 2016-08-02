@@ -34,7 +34,8 @@ var PlayPane = React.createClass({
                  play="true"/>
 
         <PlayViewLabel gitLink={this.props.displayInfo.gitLink}
-                       fullScreenEvent={this._onDoubleClick}
+                       fullScreenEvent={this._goFullViewMode}
+                       openSettingsView={this._openSettingsView}
                        focus={focus}
                        name={this.props.displayInfo.name}
                        description={this.props.displayInfo.text}/>
@@ -58,9 +59,17 @@ var PlayPane = React.createClass({
    * go full view mode on this index. really the index
    * isn't needed, but whatever for now.
    */
-  _onDoubleClick: function(){
+  _goFullViewMode: function(){
     PlayActions.goFullViewMode(this.props.id);
-  }
+  },
+  /**
+   * go full view and open settings
+   */
+  _openSettingsView: function(){
+    PlayActions.setSettingsOpen(true);
+    PlayActions.goFullViewMode(this.props.id);
+  },
+
 });
 
 module.exports = PlayPane;

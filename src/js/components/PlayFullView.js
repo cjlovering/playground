@@ -8,7 +8,8 @@ var ReactCSSTransitionGroup = require('react-addons-css-transition-group');
 var Display;
 var PlayFullView = React.createClass({
   componentWillMount: function(){
-    this.setState({"settingsVisible": false});
+    //when it first mounts, check to see if it should be opened by a cog click
+    this.setState({"settingsVisible": this.props.settingsOpen});
   },
   render: function() {
     Display = PlayStore.getDisplayModule(this.props.id);
@@ -40,18 +41,8 @@ var PlayFullView = React.createClass({
                  play="true"
                  settingsVisible={this.state.settingsVisible}/>
       </div>
-
-
     );
   },
-  //  <ReactCSSTransitionGroup
-  //           transitionName="noteTransition"
-  //           transitionEnterTimeout={550}
-  //           transitionLeaveTimeout={550}
-  //         >
-  //    {note}
-  //    </ReactCSSTransitionGroup>
-
 
   /**
    * if mouse moves in the top 15% of the page, pull down menu
@@ -61,9 +52,11 @@ var PlayFullView = React.createClass({
     var x = e.nativeEvent.x;
     var w = window.innerWidth;
 
-    if((!this.state.settingsVisible)&&(x < 0.10 * w)){
+    if((!this.state.settingsVisible)&&(x < 0.10 * w) || this.props.settingsOpen){
       this.setState({"settingsVisible" : true});
+      if (x < 0.10 * w) { PlayActions.setSettingsOpen(false); }
     } else if ((this.state.settingsVisible)&&(x > 0.25 * w)) {
+
       this.setState({"settingsVisible" : false});
     }
 

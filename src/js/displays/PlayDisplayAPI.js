@@ -29,13 +29,13 @@ var PlayDisplayAPI = {
     switch (i) {
       case 2:
         settings = {
-          rate:  250,
-          boardWidth: 30,
-          boardHeight: 20,
+          rate:  200,
+          boardWidth: 100,
+          boardHeight: 75,
           hexagonAngle: 30,
-          growth: 2,
           overpopulation: 4,
-          starvation: 3
+          starvation: 1,
+          growth: 3
         };
         break;
       case 3:

@@ -12,7 +12,7 @@ var PlayConstants = keyMirror({
   PLAY_PLAY_STOP_ALL_BUT: null,
   PLAY_FOCUS_INDEX: null,
   PLAY_DESTROY: null,
-  PLAY_FOCUS_SCREEN: null,
+  PLAY_SETTING_SCREEN: null,
   PLAY_FULL_SCREEN: null,
   PLAY_SPLIT_SCREEN: null,
   PLAY_RESET: null,

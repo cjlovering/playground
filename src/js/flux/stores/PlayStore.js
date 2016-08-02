@@ -70,6 +70,10 @@ var CHANGE_EVENT = 'change';
  */
  var displayIndex = -1;
 
+ function setDisplayIndex(index) {
+   displayIndex = index;
+ }
+
  /**
   * index of view
   * (I am using PlayConstants for multiple things, but i think the meaning is
@@ -77,10 +81,10 @@ var CHANGE_EVENT = 'change';
   */
  var viewMode = PlayConstants.PLAY_SPLIT_SCREEN;
 
+ var forceSettingsOpen = false;
 
-function setDisplayIndex(index) {
-  displayIndex = index;
-}
+
+
 
 /**
  * TODO: double check this
@@ -132,12 +136,25 @@ var PlayStore = assign({}, EventEmitter.prototype, {
   },
 
   /**
+   *  sets the value of forceSettingsOpen, so that when the viewMode
+   *  is switched, the settings are appopriately open to begin with.
+   *  @return {string}
+   */
+  setSettingsOpen: function(val) {
+    forceSettingsOpen = val;
+  },
+  getSettingsOpen: function() {
+    return forceSettingsOpen;
+  },
+
+  /**
    * Get the details on the displays
    * @return {object}
    */
   getScriptInfo: function() {
     return d;
   },
+
 
   /**
    * Get the sizing info
@@ -211,6 +228,12 @@ AppDispatcher.register(function(action) {
         setDisplayIndex(action.id);
         setSizingSplit();
         PlayStore.setViewMode(action.actionType);
+        PlayStore.emitChange();
+      }
+      break;
+    case PlayConstants.PLAY_SETTING_SCREEN:
+      if (action.actionType !== forceSettingsOpen){
+        PlayStore.setSettingsOpen(action.val);
         PlayStore.emitChange();
       }
       break;

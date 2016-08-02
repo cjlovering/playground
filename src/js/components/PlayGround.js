@@ -19,7 +19,8 @@ function getPlayState() {
     scriptData: PlayStore.getScriptInfo(),
     sizing: PlayStore.getSizingInfo(),
     viewMode: PlayStore.getViewMode(),
-    displayIndex: PlayStore.getDisplayIndex()
+    displayIndex: PlayStore.getDisplayIndex(),
+    settingsOpen: PlayStore.getSettingsOpen()
   };
 }
 
@@ -78,7 +79,8 @@ var PlayGround = React.createClass({
                         id={this.state.displayIndex}
                         displayInfo={this.state.scriptData[this.state.displayIndex]}
                         sizing={this.state.sizing}
-                        viewMode={this.props.viewMode}/>
+                        viewMode={this.props.viewMode}
+                        settingsOpen={this.state.settingsOpen}/>
         );
         break;
        default:
