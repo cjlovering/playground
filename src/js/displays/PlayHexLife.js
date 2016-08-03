@@ -156,14 +156,18 @@ function SetC(n, l){
 }
 
 //click input
-function inject(x, y){
+function inject(eventInfo){
 
-    var xx,
+    var x,
+        y,
+        xx,
         yy,
         test,
         test2,
         i;
 
+    x = eventInfo.offsetX || eventInfo.layerX;
+    y = eventInfo.offsetY || eventInfo.layerY;
 
     yy = Math.floor(y / (hexHeight + sideLength));
     xx = Math.floor((x - (yy % 2) * hexRadius) / hexRectangleWidth);
