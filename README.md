@@ -8,7 +8,7 @@ can be modified by pulling the menu over from the left in the full screen
 view or by clicking on the gear icon.
 
 ## live!
-playground.vision
+http://playground.vision
 
 ## current active displays
 * Stars
