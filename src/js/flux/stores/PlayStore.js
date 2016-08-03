@@ -47,7 +47,7 @@ var CHANGE_EVENT = 'change';
  function setSizingSplit(){
     sizing = {
       width: ((window.innerWidth * (1.00 - (0.03 + 0.03 + 0.02)- (0.02 * ( d.length - 2)) )) / d.length),
-      height: (window.innerHeight * 0.81)
+      height: (window.innerHeight - 79 - 35 - 15)
     }
   };
 
@@ -60,7 +60,7 @@ var CHANGE_EVENT = 'change';
 
  var sizing = {
      width: ((window.innerWidth * (1.00 - (0.03 + 0.03 + 0.02)- (0.02 * ( d.length - 2)) )) / d.length),
-     height: (window.innerHeight * 0.81)
+     height: (window.innerHeight - 79 - 35 - 15)
  };
 
 /**

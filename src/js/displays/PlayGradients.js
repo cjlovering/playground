@@ -182,7 +182,9 @@ var PlayGradients = React.createClass({
            <a href={this.props.displayInfo.gitLink} target="_blank">
              <i className={iconGit}></i>
            </a>
-
+           <i className={iconDownload}
+              onClick={this._download}>
+           </i>
            <i className={iconPausePlay}
               onClick={this._togglePlay}>
            </i>

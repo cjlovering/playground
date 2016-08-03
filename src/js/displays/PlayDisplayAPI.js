@@ -1,6 +1,11 @@
 var React = require('react');
 var PlayConstants = require('./../flux/constants/PlayConstants');
 
+/**
+ *  stores and exports some general functionality
+ *  across the displays to a an API
+ */
+
 var PlayDisplayAPI = {
   /**
    * gets the canvas object with correct style and width/height
@@ -64,11 +69,19 @@ var PlayDisplayAPI = {
             //no op
         }
         break;
+      case 1:
+        settings = {
+          threshold: 0.21,
+          star_num: 25,
+          rate: 5,
+          angle: 180
+        };
+        break;
       case 2:
         settings = {
           rate:  200,
-          boardWidth: 100,
-          boardHeight: 75,
+          boardWidth: 45,
+          boardHeight: 30,
           hexagonAngle: 30,
           overpopulation: 4,
           starvation: 1,
@@ -90,9 +103,7 @@ var PlayDisplayAPI = {
         break;//no op
     }
     return settings;
-  },
-
-
+  }
 };
 
 module.exports = PlayDisplayAPI;

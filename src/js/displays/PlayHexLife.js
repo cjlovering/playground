@@ -42,17 +42,9 @@ var tempSettings = {
   growth: 1
 }
 
-var settings = {
-  rate:  200,
-  boardWidth: 100,
-  boardHeight: 75,
-  hexagonAngle: 30,
-  overpopulation: 5,
-  starvation: 2,
-  growth: 1
-}
+var settings;
 
-var cells = createCellArray();
+var cells;// = createCellArray();
 
 //hex class
 function Hexagon(x,y) {
@@ -164,18 +156,14 @@ function SetC(n, l){
 }
 
 //click input
-function inject(eventInfo){
+function inject(x, y){
 
-    var x,
-        y,
-        xx,
+    var xx,
         yy,
         test,
         test2,
         i;
 
-    x = eventInfo.offsetX || eventInfo.layerX;
-    y = eventInfo.offsetY || eventInfo.layerY;
 
     yy = Math.floor(y / (hexHeight + sideLength));
     xx = Math.floor((x - (yy % 2) * hexRadius) / hexRectangleWidth);
@@ -255,11 +243,14 @@ function mouseMoveResponse(eventInfo){
     hexX = Math.floor((x - (hexY % 2) * hexRadius) / hexRectangleWidth);
 
    if((hexX >= 0 && hexX < settings.boardWidth) && (hexY >= 0 && hexY < settings.boardHeight)) {
-        if(currentHex != cells[hexX][hexY]){
-            currentHex = cells[hexX][hexY];
-            currentHex.Live();
-            currentHex.Draw();
-        }
+     currentHex = cells[hexX][hexY];
+     currentHex.Live();
+     currentHex.Draw();
+        // if(currentHex != cells[hexX][hexY]){
+        //     currentHex = cells[hexX][hexY];
+        //     currentHex.Live();
+        //     currentHex.Draw();
+        // }
     }
 }
 
@@ -379,19 +370,22 @@ var PlayHexLife = React.createClass({
 
         });
 
-        canvas.addEventListener("mouseout", function(eventInfo){
+        canvas.addEventListener("mouseout", this._mouseOutEvent);
 
-            inject(eventInfo);
-
-            tempSettings.growth = settings.growth;
-            tempSettings.overpopulation = settings.overpopulation;
-            tempSettings.starvation = settings.starvation;
-
-            settings.growth = 3;
-            settings.overpopulation = 4;
-            settings.starvation = 2;
-
-        });
+        // canvas.addEventListener("mouseout", function(eventInfo){
+        //
+        //     inject(eventInfo);
+        //
+        //     if (this.props.viewMode == PlayConstants.PLAY_SPLIT_SCREEN){
+        //       tempSettings.growth = settings.growth;
+        //       tempSettings.overpopulation = settings.overpopulation;
+        //       tempSettings.starvation = settings.starvation;
+        //
+        //       settings.growth = 3;
+        //       settings.overpopulation = 4;
+        //       settings.starvation = 2;
+        //     }
+        // });
 
         canvas.addEventListener("mouseenter", function(eventInfo){
 
@@ -409,10 +403,11 @@ var PlayHexLife = React.createClass({
       this.play();
     },
     componentWillMount: function() {
-      //cells = createCellArray();
+      settings = PlayDisplayAPI.getSettingDefaults(this.props.id);
+      cells = createCellArray();
     },
     componentWillUnmount: function(){
-      //cells = [];
+      cells = [];
     },
     render: function() {
 
@@ -616,6 +611,18 @@ var PlayHexLife = React.createClass({
 
 
     },
+    _mouseOutEvent: function( e ) {
+
+      if (this.props.viewMode == PlayConstants.PLAY_SPLIT_SCREEN){
+        tempSettings.growth = settings.growth;
+        tempSettings.overpopulation = settings.overpopulation;
+        tempSettings.starvation = settings.starvation;
+
+        settings.growth = 3;
+        settings.overpopulation = 4;
+        settings.starvation = 2;
+      }
+    }
 });
 
 module.exports = PlayHexLife;

@@ -4,17 +4,16 @@ var $     = require('jquery'); //installed with node
 var PlayDisplayAPI = require('./PlayDisplayAPI');
 var PlayConstants = require('./../flux/constants/PlayConstants');
 var ReactCSSTransitionGroup = require('react-addons-css-transition-group');
+var PlayActions = require('./../flux/actions/PlayActions');
 
 //script variables
 var canvas, ctx;
 var canvasHeight, canvasWidth;
 
 var resizeId;
-//    var star_num = 40;
-var stars = [];       //create stars
+var stars = [];
 
 //constants
-//var RATE =  10;//100
 var BASE_SIZE = 4;
 var LIGHT = ["#ccff66","#FFD700", "#66ccff", "#ff6fcf", "#ff6666", "#72E6DA"];
 var VIBRANT = ["#7FFF00", "#0276FD", "#00FFFF", "#FF1493", "#FF0000"];
@@ -23,16 +22,8 @@ var ANGLE = Math.PI / 180;
 var N_CUTOFF = 6;
 var SPEED = 2;
 
-//dynamic data (keeping it static for now for simplicty)
-//i used to use ractive here, but gonna just not for now
-var settings = {
-  threshold: 0.21,
-  star_num: 25,
-  rate: 5,
-  angle: 180
-};
+var settings;
 
-//basic math and utility funcitons
 var util = {
   /**
    * random :: num num num -> num
@@ -201,6 +192,9 @@ var PlayHubs = React.createClass({
       //this.configureCanvas(nextProps.width, nextProps.height);
     }
   },
+  componentWillMount: function(){
+    settings = PlayDisplayAPI.getSettingDefaults(this.props.id);
+  },
   componentDidMount: function(){
     //this.createStars(data.star_num);
     this.play();
@@ -246,53 +240,70 @@ var PlayHubs = React.createClass({
 
     var canvasJSX = PlayDisplayAPI.getCanvasDisplay(this.props);
 
-    var forms =
-    this.props.settingsVisible ?
-    <div className="settingsDiv">
-    <h2>{this.props.name}</h2>
-    <form className="form">
-     <div className="formField">
-       <h3 className="settingSectionH">Bridge Threshold</h3>
-       <input
-         id="slider1"
-         type="range"
-         max={1.0}
-         min={0.0}
-         step={0.01}
-         value={settings.threshold}
-         onChange={this.handleBridgeThresholdChange}
-       />
-       <output id="range1">{settings.threshold * 100}%</output>
-     </div>
-     <div className="formField">
-       <h3 className="settingSectionH">Star Count</h3>
-       <input
-         id="slider2"
-         type="range"
-         max={200}
-         min={1}
-         step={5}
-         value={settings.star_num}
-         onChange={this.handleStarNumChange}
-       />
-       <output id="range2">{settings.star_num}</output>
-     </div>
-     <div className="formField">
-       <h3 className="settingSectionH">Angle</h3>
-       <input
-         id="slider3"
-         type="range"
-         max={360}
-         min={1}
-         step={1}
-         value={settings.angle}
-         onChange={this.handleAngleChange}
-       />
-       <output id="range3">{settings.angle}</output>
-     </div>
-     </form>
-     </div>  : null;
+    var iconGit = "fa fa-github fa-lg settingIcon" + this.props.focus;
+    var iconCompress = "fa fa-compress fa-lg settingIcon" + this.props.focus;
+    var iconRefresh = "fa fa-refresh fa-lg settingIcon" + this.props.focus;
+    var iconClear = "fa fa-eraser fa-lg settingIcon" + this.props.focus;
 
+    var forms = this.props.settingsVisible ?
+    <div className="settingsDiv">
+      <div className="settingsDivTitle">
+       <h2>{this.props.name}</h2>
+      </div>
+
+      <div className="settingsDivSlider">
+        <h3 className="settingSectionH">
+          <a href={this.props.displayInfo.gitLink} target="_blank">
+            <i className={iconGit}></i>
+          </a>
+          <i className={iconRefresh}
+             onClick={this._reset}>
+          </i>
+          <i className={iconCompress}
+             onClick={this._collapse}>
+          </i>
+        </h3>
+      </div>
+
+      <div className="form">
+       <div className="settingsDivSlider">
+         <h3 className="settingSectionH">Bridge Threshold</h3>
+         <input
+           id="slider1"
+           type="range"
+           max={1.0}
+           min={0.0}
+           step={0.01}
+           value={settings.threshold}
+           onChange={this.handleBridgeThresholdChange} />
+         <output id="range1">{settings.threshold * 100}%</output>
+       </div>
+       <div className="settingsDivSlider">
+         <h3 className="settingSectionH">Star Count</h3>
+         <input
+           id="slider2"
+           type="range"
+           max={200}
+           min={1}
+           step={5}
+           value={settings.star_num}
+           onChange={this.handleStarNumChange}/>
+         <output id="range2">{settings.star_num}</output>
+       </div>
+       <div className="settingsDivSlider">
+         <h3 className="settingSectionH">Angle</h3>
+         <input
+           id="slider3"
+           type="range"
+           max={360}
+           min={1}
+           step={1}
+           value={settings.angle}
+           onChange={this.handleAngleChange}/>
+         <output id="range3">{settings.angle}</output>
+       </div>
+     </div>
+   </div>  : null;
 
    return ( <div>
              <ReactCSSTransitionGroup
@@ -324,7 +335,21 @@ var PlayHubs = React.createClass({
     settings.angle = e.target.value;
     this.forceUpdate();
     //this.setState({ alpha: value });
+  },
+  /**
+   * call action to focus on this particular pane.
+   */
+  _reset: function(){
+    settings = PlayDisplayAPI.getSettingDefaults(this.props.id);
+    this.forceUpdate();
+  },
+  /**
+   * call action to focus on this particular pane.
+   */
+  _collapse: function(){
+    PlayActions.goSplitViewMode(this.props.id);
   }
+
 });
 
 module.exports = PlayHubs;

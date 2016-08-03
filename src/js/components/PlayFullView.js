@@ -54,7 +54,7 @@ var PlayFullView = React.createClass({
 
     if((!this.state.settingsVisible)&&(x < 0.10 * w) || this.props.settingsOpen){
       this.setState({"settingsVisible" : true});
-      if (x < 0.10 * w) { PlayActions.setSettingsOpen(false); }
+      if (x < 0.15 * w) { PlayActions.setSettingsOpen(false); }
     } else if ((this.state.settingsVisible)&&(x > 0.25 * w)) {
 
       this.setState({"settingsVisible" : false});
@@ -62,12 +62,12 @@ var PlayFullView = React.createClass({
 
   },
 
-  // /**
-  //  * go back to sp
-  //  */
-  // _onDoubleClick: function(){
-  //   PlayActions.goSplitViewMode(this.props.id);
-  // }
+  /**
+   * go back to split view
+   */
+  _onDoubleClick: function(){
+    PlayActions.goSplitViewMode(this.props.id);
+  }
 });
 
 module.exports = PlayFullView;

@@ -22,7 +22,8 @@ var PlayPane = React.createClass({
     return (
       <div className={styleName}
            onMouseEnter={this._onMouseEnter}
-           onMouseLeave={this._onMouseLeave}>
+           onMouseLeave={this._onMouseLeave}
+           onDoubleClick={this._goFullViewMode}>
         <Display displayInfo={this.props.displayInfo}
                  height={this.props.sizing.height}
                  width={this.props.sizing.width}

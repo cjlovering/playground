@@ -15,12 +15,12 @@ var PlayViewLabel = React.createClass({
           {label}
         </span>
         <span>
-          <i className={iconCogs}
-             onClick={this.props.openSettingsView}>
-          </i>
           <a href={this.props.gitLink} target="_blank">
             <i className={iconClassNameGit}></i>
           </a>
+          <i className={iconCogs}
+             onClick={this.props.openSettingsView}>
+          </i>
           <i className={iconClassNameExpand}
              onClick={this.props.fullScreenEvent}>
           </i>

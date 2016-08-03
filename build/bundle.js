@@ -32033,15 +32033,21 @@ var PlayFullView = React.createClass({
 
     if (!this.state.settingsVisible && x < 0.10 * w || this.props.settingsOpen) {
       this.setState({ "settingsVisible": true });
-      if (x < 0.10 * w) {
+      if (x < 0.15 * w) {
         PlayActions.setSettingsOpen(false);
       }
     } else if (this.state.settingsVisible && x > 0.25 * w) {
 
       this.setState({ "settingsVisible": false });
     }
-  }
+  },
 
+  /**
+   * go back to split view
+   */
+  _onDoubleClick: function () {
+    PlayActions.goSplitViewMode(this.props.id);
+  }
 });
 
 module.exports = PlayFullView;
@@ -32186,7 +32192,8 @@ var PlayPane = React.createClass({
       'div',
       { className: styleName,
         onMouseEnter: this._onMouseEnter,
-        onMouseLeave: this._onMouseLeave },
+        onMouseLeave: this._onMouseLeave,
+        onDoubleClick: this._goFullViewMode },
       React.createElement(Display, { displayInfo: this.props.displayInfo,
         height: this.props.sizing.height,
         width: this.props.sizing.width,
@@ -32319,13 +32326,13 @@ var PlayViewLabel = React.createClass({
       React.createElement(
         'span',
         null,
-        React.createElement('i', { className: iconCogs,
-          onClick: this.props.openSettingsView }),
         React.createElement(
           'a',
           { href: this.props.gitLink, target: '_blank' },
           React.createElement('i', { className: iconClassNameGit })
         ),
+        React.createElement('i', { className: iconCogs,
+          onClick: this.props.openSettingsView }),
         React.createElement('i', { className: iconClassNameExpand,
           onClick: this.props.fullScreenEvent })
       )
@@ -32339,6 +32346,11 @@ module.exports = PlayViewLabel;
 },{"react":185}],193:[function(require,module,exports){
 var React = require('react');
 var PlayConstants = require('./../flux/constants/PlayConstants');
+
+/**
+ *  stores and exports some general functionality
+ *  across the displays to a an API
+ */
 
 var PlayDisplayAPI = {
   /**
@@ -32401,11 +32413,19 @@ var PlayDisplayAPI = {
           //no op
         }
         break;
+      case 1:
+        settings = {
+          threshold: 0.21,
+          star_num: 25,
+          rate: 5,
+          angle: 180
+        };
+        break;
       case 2:
         settings = {
           rate: 200,
-          boardWidth: 100,
-          boardHeight: 75,
+          boardWidth: 45,
+          boardHeight: 30,
           hexagonAngle: 30,
           overpopulation: 4,
           starvation: 1,
@@ -32428,7 +32448,6 @@ var PlayDisplayAPI = {
     }
     return settings;
   }
-
 };
 
 module.exports = PlayDisplayAPI;
@@ -32625,6 +32644,8 @@ var PlayGradients = React.createClass({
             { href: this.props.displayInfo.gitLink, target: '_blank' },
             React.createElement('i', { className: iconGit })
           ),
+          React.createElement('i', { className: iconDownload,
+            onClick: this._download }),
           React.createElement('i', { className: iconPausePlay,
             onClick: this._togglePlay }),
           React.createElement('i', { className: iconRefresh,
@@ -33056,17 +33077,9 @@ var tempSettings = {
     growth: 1
 };
 
-var settings = {
-    rate: 200,
-    boardWidth: 100,
-    boardHeight: 75,
-    hexagonAngle: 30,
-    overpopulation: 5,
-    starvation: 2,
-    growth: 1
-};
+var settings;
 
-var cells = createCellArray();
+var cells; // = createCellArray();
 
 //hex class
 function Hexagon(x, y) {
@@ -33160,12 +33173,9 @@ function SetC(n, l) {
 }
 
 //click input
-function inject(eventInfo) {
+function inject(x, y) {
 
-    var x, y, xx, yy, test, test2, i;
-
-    x = eventInfo.offsetX || eventInfo.layerX;
-    y = eventInfo.offsetY || eventInfo.layerY;
+    var xx, yy, test, test2, i;
 
     yy = Math.floor(y / (hexHeight + sideLength));
     xx = Math.floor((x - yy % 2 * hexRadius) / hexRectangleWidth);
@@ -33232,11 +33242,14 @@ function mouseMoveResponse(eventInfo) {
     hexX = Math.floor((x - hexY % 2 * hexRadius) / hexRectangleWidth);
 
     if (hexX >= 0 && hexX < settings.boardWidth && hexY >= 0 && hexY < settings.boardHeight) {
-        if (currentHex != cells[hexX][hexY]) {
-            currentHex = cells[hexX][hexY];
-            currentHex.Live();
-            currentHex.Draw();
-        }
+        currentHex = cells[hexX][hexY];
+        currentHex.Live();
+        currentHex.Draw();
+        // if(currentHex != cells[hexX][hexY]){
+        //     currentHex = cells[hexX][hexY];
+        //     currentHex.Live();
+        //     currentHex.Draw();
+        // }
     }
 }
 
@@ -33354,18 +33367,22 @@ var PlayHexLife = React.createClass({
                 // settings.starvation = 2;
             });
 
-            canvas.addEventListener("mouseout", function (eventInfo) {
+            canvas.addEventListener("mouseout", this._mouseOutEvent);
 
-                inject(eventInfo);
-
-                tempSettings.growth = settings.growth;
-                tempSettings.overpopulation = settings.overpopulation;
-                tempSettings.starvation = settings.starvation;
-
-                settings.growth = 3;
-                settings.overpopulation = 4;
-                settings.starvation = 2;
-            });
+            // canvas.addEventListener("mouseout", function(eventInfo){
+            //
+            //     inject(eventInfo);
+            //
+            //     if (this.props.viewMode == PlayConstants.PLAY_SPLIT_SCREEN){
+            //       tempSettings.growth = settings.growth;
+            //       tempSettings.overpopulation = settings.overpopulation;
+            //       tempSettings.starvation = settings.starvation;
+            //
+            //       settings.growth = 3;
+            //       settings.overpopulation = 4;
+            //       settings.starvation = 2;
+            //     }
+            // });
 
             canvas.addEventListener("mouseenter", function (eventInfo) {
 
@@ -33382,10 +33399,11 @@ var PlayHexLife = React.createClass({
         this.play();
     },
     componentWillMount: function () {
-        //cells = createCellArray();
+        settings = PlayDisplayAPI.getSettingDefaults(this.props.id);
+        cells = createCellArray();
     },
     componentWillUnmount: function () {
-        //cells = [];
+        cells = [];
     },
     render: function () {
 
@@ -33654,6 +33672,18 @@ var PlayHexLife = React.createClass({
             onResizeDraw();
             o.r.forceUpdate();
         }, 100, { val: e.target.value, r: this });
+    },
+    _mouseOutEvent: function (e) {
+
+        if (this.props.viewMode == PlayConstants.PLAY_SPLIT_SCREEN) {
+            tempSettings.growth = settings.growth;
+            tempSettings.overpopulation = settings.overpopulation;
+            tempSettings.starvation = settings.starvation;
+
+            settings.growth = 3;
+            settings.overpopulation = 4;
+            settings.starvation = 2;
+        }
     }
 });
 
@@ -33667,17 +33697,16 @@ var $ = require('jquery'); //installed with node
 var PlayDisplayAPI = require('./PlayDisplayAPI');
 var PlayConstants = require('./../flux/constants/PlayConstants');
 var ReactCSSTransitionGroup = require('react-addons-css-transition-group');
+var PlayActions = require('./../flux/actions/PlayActions');
 
 //script variables
 var canvas, ctx;
 var canvasHeight, canvasWidth;
 
 var resizeId;
-//    var star_num = 40;
-var stars = []; //create stars
+var stars = [];
 
 //constants
-//var RATE =  10;//100
 var BASE_SIZE = 4;
 var LIGHT = ["#ccff66", "#FFD700", "#66ccff", "#ff6fcf", "#ff6666", "#72E6DA"];
 var VIBRANT = ["#7FFF00", "#0276FD", "#00FFFF", "#FF1493", "#FF0000"];
@@ -33686,16 +33715,8 @@ var ANGLE = Math.PI / 180;
 var N_CUTOFF = 6;
 var SPEED = 2;
 
-//dynamic data (keeping it static for now for simplicty)
-//i used to use ractive here, but gonna just not for now
-var settings = {
-  threshold: 0.21,
-  star_num: 25,
-  rate: 5,
-  angle: 180
-};
+var settings;
 
-//basic math and utility funcitons
 var util = {
   /**
    * random :: num num num -> num
@@ -33866,6 +33887,9 @@ var PlayHubs = React.createClass({
       //this.configureCanvas(nextProps.width, nextProps.height);
     }
   },
+  componentWillMount: function () {
+    settings = PlayDisplayAPI.getSettingDefaults(this.props.id);
+  },
   componentDidMount: function () {
     //this.createStars(data.star_num);
     this.play();
@@ -33911,20 +33935,46 @@ var PlayHubs = React.createClass({
 
     var canvasJSX = PlayDisplayAPI.getCanvasDisplay(this.props);
 
+    var iconGit = "fa fa-github fa-lg settingIcon" + this.props.focus;
+    var iconCompress = "fa fa-compress fa-lg settingIcon" + this.props.focus;
+    var iconRefresh = "fa fa-refresh fa-lg settingIcon" + this.props.focus;
+    var iconClear = "fa fa-eraser fa-lg settingIcon" + this.props.focus;
+
     var forms = this.props.settingsVisible ? React.createElement(
       'div',
       { className: 'settingsDiv' },
       React.createElement(
-        'h2',
-        null,
-        this.props.name
+        'div',
+        { className: 'settingsDivTitle' },
+        React.createElement(
+          'h2',
+          null,
+          this.props.name
+        )
       ),
       React.createElement(
-        'form',
+        'div',
+        { className: 'settingsDivSlider' },
+        React.createElement(
+          'h3',
+          { className: 'settingSectionH' },
+          React.createElement(
+            'a',
+            { href: this.props.displayInfo.gitLink, target: '_blank' },
+            React.createElement('i', { className: iconGit })
+          ),
+          React.createElement('i', { className: iconRefresh,
+            onClick: this._reset }),
+          React.createElement('i', { className: iconCompress,
+            onClick: this._collapse })
+        )
+      ),
+      React.createElement(
+        'div',
         { className: 'form' },
         React.createElement(
           'div',
-          { className: 'formField' },
+          { className: 'settingsDivSlider' },
           React.createElement(
             'h3',
             { className: 'settingSectionH' },
@@ -33937,8 +33987,7 @@ var PlayHubs = React.createClass({
             min: 0.0,
             step: 0.01,
             value: settings.threshold,
-            onChange: this.handleBridgeThresholdChange
-          }),
+            onChange: this.handleBridgeThresholdChange }),
           React.createElement(
             'output',
             { id: 'range1' },
@@ -33948,7 +33997,7 @@ var PlayHubs = React.createClass({
         ),
         React.createElement(
           'div',
-          { className: 'formField' },
+          { className: 'settingsDivSlider' },
           React.createElement(
             'h3',
             { className: 'settingSectionH' },
@@ -33961,8 +34010,7 @@ var PlayHubs = React.createClass({
             min: 1,
             step: 5,
             value: settings.star_num,
-            onChange: this.handleStarNumChange
-          }),
+            onChange: this.handleStarNumChange }),
           React.createElement(
             'output',
             { id: 'range2' },
@@ -33971,7 +34019,7 @@ var PlayHubs = React.createClass({
         ),
         React.createElement(
           'div',
-          { className: 'formField' },
+          { className: 'settingsDivSlider' },
           React.createElement(
             'h3',
             { className: 'settingSectionH' },
@@ -33984,8 +34032,7 @@ var PlayHubs = React.createClass({
             min: 1,
             step: 1,
             value: settings.angle,
-            onChange: this.handleAngleChange
-          }),
+            onChange: this.handleAngleChange }),
           React.createElement(
             'output',
             { id: 'range3' },
@@ -34027,13 +34074,27 @@ var PlayHubs = React.createClass({
     settings.angle = e.target.value;
     this.forceUpdate();
     //this.setState({ alpha: value });
+  },
+  /**
+   * call action to focus on this particular pane.
+   */
+  _reset: function () {
+    settings = PlayDisplayAPI.getSettingDefaults(this.props.id);
+    this.forceUpdate();
+  },
+  /**
+   * call action to focus on this particular pane.
+   */
+  _collapse: function () {
+    PlayActions.goSplitViewMode(this.props.id);
   }
+
 });
 
 module.exports = PlayHubs;
 
 
-},{"./../flux/constants/PlayConstants":199,"./PlayDisplayAPI":193,"jquery":33,"react":185,"react-addons-css-transition-group":37}],197:[function(require,module,exports){
+},{"./../flux/actions/PlayActions":198,"./../flux/constants/PlayConstants":199,"./PlayDisplayAPI":193,"jquery":33,"react":185,"react-addons-css-transition-group":37}],197:[function(require,module,exports){
 //react
 var React = require('react');
 var $ = require('jquery'); //installed with node
@@ -34638,7 +34699,7 @@ var d = [{
 function setSizingSplit() {
   sizing = {
     width: window.innerWidth * (1.00 - (0.03 + 0.03 + 0.02) - 0.02 * (d.length - 2)) / d.length,
-    height: window.innerHeight * 0.81
+    height: window.innerHeight - 79 - 35 - 15
   };
 };
 
@@ -34651,7 +34712,7 @@ function setSizingFull() {
 
 var sizing = {
   width: window.innerWidth * (1.00 - (0.03 + 0.03 + 0.02) - 0.02 * (d.length - 2)) / d.length,
-  height: window.innerHeight * 0.81
+  height: window.innerHeight - 79 - 35 - 15
 };
 
 /**
