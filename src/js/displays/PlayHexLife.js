@@ -13,6 +13,7 @@ var right = true;
 var counter = 0;
 var canvas;
 var resizeId;
+var loopId;
 
 var ctx, currentHex = new Hexagon();
 
@@ -336,7 +337,7 @@ function configureHexagonParameters(){
 }
 
 function loop(){
-    setTimeout(function() {
+    loopId = setTimeout(function() {
         requestAnimationFrame(loop);
         // Drawing code goes here
 
@@ -426,6 +427,7 @@ var PlayHexLife = React.createClass({
       cells = createCellArray();
     },
     componentWillUnmount: function(){
+      clearTimeout(loopId);
       cells = [];
     },
     render: function() {
