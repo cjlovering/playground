@@ -130,16 +130,7 @@ var PlayHubs = React.createClass({
       //get two-d context (as opposed to 3d)
       ctx = canvas.getContext('2d');
 
-      //configure the size of the canvas + thresholds
-      //this.configureCanvas();
-
-      //create all the stars, pseudo randomly
-      // phase 1: draw hubs
       this.drawStars();
-      // phase 2: draw edges
-      //drawEdges();
-
-      //loops
       this.loop();
   },
   loop: function(){
@@ -153,14 +144,10 @@ var PlayHubs = React.createClass({
 		var l = settings.star_num;
 		var ll = stars.length;
 
-	  //if (l > ll)      this.createStars(l - ll);
-		//else if (ll > l) this.reduceStars (ll - l);
     if (l > ll)      this.createStars(1);
     else if (ll > l) this.reduceStars (1);
-		// phase 1: move stars
-		this.moveStars();
 
-		// phase 2: draw stars & edges
+		this.moveStars();
 		this.drawStars();
   },
   /**
@@ -319,22 +306,16 @@ var PlayHubs = React.createClass({
           );
   },
   handleStarNumChange: function( e ) {
-
-    //document.getElementById('range1').innerHTML = e.target.value;
     settings.star_num = e.target.value;
     this.forceUpdate();
   },
   handleBridgeThresholdChange: function( e ) {
-
     settings.threshold = e.target.value;
     this.forceUpdate();
-    //this.setState({ alpha: value });
   },
   handleAngleChange: function( e ) {
-
     settings.angle = e.target.value;
     this.forceUpdate();
-    //this.setState({ alpha: value });
   },
   /**
    * call action to focus on this particular pane.
