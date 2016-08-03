@@ -32008,7 +32008,8 @@ var PlayFullView = React.createClass({
     return React.createElement(
       'div',
       { className: styleName,
-        onMouseMove: this._onMouseMove },
+        onMouseMove: this._onMouseMove,
+        onDoubleClick: this._onDoubleClick },
       React.createElement(Display, { displayInfo: this.props.displayInfo,
         name: this.props.displayInfo.name,
         height: this.props.sizing.height,

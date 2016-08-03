@@ -28,7 +28,8 @@ var PlayFullView = React.createClass({
      */
     return (
       <div className={styleName}
-           onMouseMove={this._onMouseMove}>
+           onMouseMove={this._onMouseMove}
+           onDoubleClick={this._onDoubleClick}>
         <Display displayInfo={this.props.displayInfo}
                  name={this.props.displayInfo.name}
                  height={this.props.sizing.height}
