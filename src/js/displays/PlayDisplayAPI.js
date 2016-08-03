@@ -83,7 +83,7 @@ var PlayDisplayAPI = {
           boardWidth: 45,
           boardHeight: 30,
           hexagonAngle: 30,
-          overpopulation: 4,
+          overpopulation: 5,
           starvation: 1,
           growth: 3
         };

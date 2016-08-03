@@ -93,18 +93,33 @@ function Hexagon(x,y) {
     }
 
     this.Draw = function(){
-        if(this.live == this.lastLive && this.n == this.lastN) return;
-        else {
-        this.lastN = this.n;
-        this.lastLive = this.lastLive;
+        if(this.live == this.lastLive && this.n == this.lastN) {
+          return;
+        } else {
+          this.lastN = this.n;
+          this.lastLive = this.lastLive;
         }
+
         var screenX = this.x * hexRectangleWidth + ((this.y % 2) * hexRadius);
         var screenY = this.y * (hexHeight + sideLength);
+
         ctx.fillStyle = getColor(this.n);
-        if (this.live) drawHexagon(ctx, screenX, screenY);        //Rules(this.Neighbors(), this.live)
+        if (this.next) drawHexagon(ctx, screenX, screenY);        //Rules(this.Neighbors(), this.live)
         else clearHexagon(ctx, screenX, screenY);
         this.live = this.next;
     }
+
+    // this.ForceDraw = function(){
+    //   this.lastN = this.n;
+    //   this.lastLive = this.lastLive;
+    //
+    //   var screenX = this.x * hexRectangleWidth + ((this.y % 2) * hexRadius);
+    //   var screenY = this.y * (hexHeight + sideLength);
+    //   ctx.fillStyle = getColor(this.n);
+    //   if (this.live) drawHexagon(ctx, screenX, screenY);        //Rules(this.Neighbors(), this.live)
+    //   else clearHexagon(ctx, screenX, screenY);
+    //   this.live = this.next;
+    // }
 }
 
 function Rules(n, l){

@@ -32427,7 +32427,7 @@ var PlayDisplayAPI = {
           boardWidth: 45,
           boardHeight: 30,
           hexagonAngle: 30,
-          overpopulation: 4,
+          overpopulation: 5,
           starvation: 1,
           growth: 3
         };
@@ -33072,9 +33072,9 @@ var keepCurrentSettings = true; //false
 //   growth: 1
 // }
 var tempSettings = {
-    overpopulation: 5,
-    starvation: 2,
-    growth: 1
+  overpopulation: 5,
+  starvation: 2,
+  growth: 1
 };
 
 var settings;
@@ -33083,611 +33083,627 @@ var cells; // = createCellArray();
 
 //hex class
 function Hexagon(x, y) {
-    this.x = x;
-    this.y = y;
-    this.live = false;
+  this.x = x;
+  this.y = y;
+  this.live = false;
+  this.next = false;
+  this.n = 0;
+  this.lastN = -1;
+  this.lastLive = true;
+
+  this.Play = function () {
+    this.next = Rules(this.Neighbors(), this.live);
+  };
+
+  this.Kill = function () {
     this.next = false;
-    this.n = 0;
-    this.lastN = -1;
-    this.lastLive = true;
+  };
 
-    this.Play = function () {
-        this.next = Rules(this.Neighbors(), this.live);
-    };
+  this.Live = function () {
+    this.next = true;
+  };
 
-    this.Kill = function () {
-        this.next = false;
-    };
+  this.Alive = function () {
+    return this.live;
+  };
 
-    this.Live = function () {
-        this.next = true;
-    };
+  this.Neighbors = function () {
 
-    this.Alive = function () {
-        return this.live;
-    };
+    var test,
+        n = 0;
 
-    this.Neighbors = function () {
+    if (this.y % 2 == 0) {
 
-        var test,
-            n = 0;
+      test = [[0, -1], [1, -1], [1, 0], [0, 1], [-1, 0], [-1, 1], [-1, -1]]; //[0, 0 ],
+    } else {
 
-        if (this.y % 2 == 0) {
+      test = [[0, -1], [1, -1], [1, 0], [0, 1], [-1, 0], [1, 1]]; //[0, 0 ],
+    }
 
-            test = [[0, -1], [1, -1], [1, 0], [0, 1], [-1, 0], [-1, 1], [-1, -1]]; //[0, 0 ],
-        } else {
+    for (var i = 0; i < test.length; i++) {
+      if (this.x + test[i][0] >= 0 && this.x + test[i][0] < settings.boardWidth && this.y + test[i][1] >= 0 && this.y + test[i][1] < settings.boardHeight) {
+        if (cells[this.x + test[i][0]][this.y + test[i][1]].Alive()) n += 1;
+      }
+    }
 
-            test = [[0, -1], [1, -1], [1, 0], [0, 1], [-1, 0], [1, 1]]; //[0, 0 ],
-        }
+    this.n = n;
+    return n;
+  };
 
-        for (var i = 0; i < test.length; i++) {
-            if (this.x + test[i][0] >= 0 && this.x + test[i][0] < settings.boardWidth && this.y + test[i][1] >= 0 && this.y + test[i][1] < settings.boardHeight) {
-                if (cells[this.x + test[i][0]][this.y + test[i][1]].Alive()) n += 1;
-            }
-        }
+  this.Draw = function () {
+    if (this.live == this.lastLive && this.n == this.lastN) {
+      return;
+    } else {
+      this.lastN = this.n;
+      this.lastLive = this.lastLive;
+    }
 
-        this.n = n;
-        return n;
-    };
+    var screenX = this.x * hexRectangleWidth + this.y % 2 * hexRadius;
+    var screenY = this.y * (hexHeight + sideLength);
 
-    this.Draw = function () {
-        if (this.live == this.lastLive && this.n == this.lastN) return;else {
-            this.lastN = this.n;
-            this.lastLive = this.lastLive;
-        }
-        var screenX = this.x * hexRectangleWidth + this.y % 2 * hexRadius;
-        var screenY = this.y * (hexHeight + sideLength);
-        ctx.fillStyle = getColor(this.n);
-        if (this.live) drawHexagon(ctx, screenX, screenY); //Rules(this.Neighbors(), this.live)
-        else clearHexagon(ctx, screenX, screenY);
-        this.live = this.next;
-    };
+    ctx.fillStyle = getColor(this.n);
+    if (this.next) drawHexagon(ctx, screenX, screenY); //Rules(this.Neighbors(), this.live)
+    else clearHexagon(ctx, screenX, screenY);
+    this.live = this.next;
+  };
+
+  // this.ForceDraw = function(){
+  //   this.lastN = this.n;
+  //   this.lastLive = this.lastLive;
+  //
+  //   var screenX = this.x * hexRectangleWidth + ((this.y % 2) * hexRadius);
+  //   var screenY = this.y * (hexHeight + sideLength);
+  //   ctx.fillStyle = getColor(this.n);
+  //   if (this.live) drawHexagon(ctx, screenX, screenY);        //Rules(this.Neighbors(), this.live)
+  //   else clearHexagon(ctx, screenX, screenY);
+  //   this.live = this.next;
+  // }
 }
 
 function Rules(n, l) {
 
-    if (l) {
-        if (n >= settings.overpopulation || n <= settings.starvation) return false;else return true;
-    } else if (n == settings.growth) return true;
+  if (l) {
+    if (n >= settings.overpopulation || n <= settings.starvation) return false;else return true;
+  } else if (n == settings.growth) return true;
 }
 /* no change */
 function SetA(n, l) {
 
-    if (l) {
-        if (n > 4) return false;else if (n > 1) return true;else return false;
-    } else if (n > 2) return true;
+  if (l) {
+    if (n > 4) return false;else if (n > 1) return true;else return false;
+  } else if (n > 2) return true;
 }
 /* die fast */
 function SetB(n, l) {
 
-    if (l) {
-        if (n > 3) return false;else if (n > 1) return true;else return false;
-    } else if (n > 3) return true;
+  if (l) {
+    if (n > 3) return false;else if (n > 1) return true;else return false;
+  } else if (n > 3) return true;
 }
 /* groups maintain easy, new ones not */
 function SetC(n, l) {
 
-    if (l) {
-        if (n > 5) return false;else if (n > 1) return true;else return false;
-    } else if (n > 4) return true;
+  if (l) {
+    if (n > 5) return false;else if (n > 1) return true;else return false;
+  } else if (n > 4) return true;
 }
 
 //click input
 function inject(eventInfo) {
 
-    var x, y, xx, yy, test, test2, i;
+  var x, y, xx, yy, test, test2, i;
 
-    x = eventInfo.offsetX || eventInfo.layerX;
-    y = eventInfo.offsetY || eventInfo.layerY;
+  x = eventInfo.offsetX || eventInfo.layerX;
+  y = eventInfo.offsetY || eventInfo.layerY;
 
-    yy = Math.floor(y / (hexHeight + sideLength));
-    xx = Math.floor((x - yy % 2 * hexRadius) / hexRectangleWidth);
+  yy = Math.floor(y / (hexHeight + sideLength));
+  xx = Math.floor((x - yy % 2 * hexRadius) / hexRectangleWidth);
 
-    if (yy % 2 == 0) {
+  if (yy % 2 == 0) {
 
-        test2 = [[0, -1], [1, -1], [1, 0], [0, 1], [-1, 0], [0, 0], [-1, 1], [-1, -1]];
+    test2 = [[0, -1], [1, -1], [1, 0], [0, 1], [-1, 0], [0, 0], [-1, 1], [-1, -1]];
 
-        test = [[-1, -2], [0, -2], [1, -2], [1, -1], [1, 1], [1, 2], [0, 2], [-1, 2], [-2, 1], [-2, 0], [-2, -1], [2, 0]];
-    } else {
+    test = [[-1, -2], [0, -2], [1, -2], [1, -1], [1, 1], [1, 2], [0, 2], [-1, 2], [-2, 1], [-2, 0], [-2, -1], [2, 0]];
+  } else {
 
-        test2 = [[0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [0, 0], [-1, 0]];
+    test2 = [[0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [0, 0], [-1, 0]];
 
-        test = [[-2, 0], [-1, -1], [-1, -2], [0, -2], [1, -2], [2, -1], [2, 0], [2, 1], [1, 2], [0, 2], [-1, 2], [-1, 1]];
+    test = [[-2, 0], [-1, -1], [-1, -2], [0, -2], [1, -2], [2, -1], [2, 0], [2, 1], [1, 2], [0, 2], [-1, 2], [-1, 1]];
+  }
+
+  for (i = 0; i < test2.length; i++) {
+    if (xx + test2[i][0] >= 0 && xx + test2[i][0] < settings.boardWidth && yy + test2[i][1] >= 0 && yy + test2[i][1] < settings.boardHeight) {
+      cells[xx + test2[i][0]][yy + test2[i][1]].Kill();
     }
+  }
 
-    for (i = 0; i < test2.length; i++) {
-        if (xx + test2[i][0] >= 0 && xx + test2[i][0] < settings.boardWidth && yy + test2[i][1] >= 0 && yy + test2[i][1] < settings.boardHeight) {
-            cells[xx + test2[i][0]][yy + test2[i][1]].Kill();
-        }
+  for (i = 0; i < test.length; i++) {
+    if (xx + test[i][0] >= 0 && xx + test[i][0] < settings.boardWidth && yy + test[i][1] >= 0 && yy + test[i][1] < settings.boardHeight) {
+      cells[xx + test[i][0]][yy + test[i][1]].Live();
     }
+  }
 
-    for (i = 0; i < test.length; i++) {
-        if (xx + test[i][0] >= 0 && xx + test[i][0] < settings.boardWidth && yy + test[i][1] >= 0 && yy + test[i][1] < settings.boardHeight) {
-            cells[xx + test[i][0]][yy + test[i][1]].Live();
-        }
-    }
-
-    //ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawBoard(ctx, settings.boardWidth, settings.boardHeight);
+  //ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawBoard(ctx, settings.boardWidth, settings.boardHeight);
 }
 //intial set-up
 function createCellArray() {
-    var arr = [];
-    for (var i = 0; i < settings.boardWidth; i++) arr[i] = [];
-    return arr;
+  var arr = [];
+  for (var i = 0; i < settings.boardWidth; i++) arr[i] = [];
+  return arr;
 }
 
 function populateCellArray() {
-    for (var i = 0; i < settings.boardWidth; i++) for (var j = 0; j < settings.boardHeight; j++) cells[i][j] = new Hexagon(i, j);
+  for (var i = 0; i < settings.boardWidth; i++) for (var j = 0; j < settings.boardHeight; j++) cells[i][j] = new Hexagon(i, j);
 }
 
 function onResizeDraw() {
 
-    cells = [];
-    cells = createCellArray();
-    populateCellArray();
+  cells = [];
+  cells = createCellArray();
+  populateCellArray();
 
-    ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    configureHexagonParameters();
-    drawBoard(ctx, settings.boardWidth, settings.boardHeight);
+  configureHexagonParameters();
+  drawBoard(ctx, settings.boardWidth, settings.boardHeight);
 }
 
 function mouseMoveResponse(eventInfo) {
 
-    var x, y, hexX, hexY, screenX, screenY;
+  var x, y, hexX, hexY, screenX, screenY;
 
-    x = eventInfo.offsetX || eventInfo.layerX;
-    y = eventInfo.offsetY || eventInfo.layerY;
+  x = eventInfo.offsetX || eventInfo.layerX;
+  y = eventInfo.offsetY || eventInfo.layerY;
 
-    hexY = Math.floor(y / (hexHeight + sideLength));
-    hexX = Math.floor((x - hexY % 2 * hexRadius) / hexRectangleWidth);
+  hexY = Math.floor(y / (hexHeight + sideLength));
+  hexX = Math.floor((x - hexY % 2 * hexRadius) / hexRectangleWidth);
 
-    if (hexX >= 0 && hexX < settings.boardWidth && hexY >= 0 && hexY < settings.boardHeight) {
-        currentHex = cells[hexX][hexY];
-        currentHex.Live();
-        currentHex.Draw();
-        // if(currentHex != cells[hexX][hexY]){
-        //     currentHex = cells[hexX][hexY];
-        //     currentHex.Live();
-        //     currentHex.Draw();
-        // }
-    }
+  if (hexX >= 0 && hexX < settings.boardWidth && hexY >= 0 && hexY < settings.boardHeight) {
+    currentHex = cells[hexX][hexY];
+    currentHex.Live();
+    currentHex.Draw();
+    // if(currentHex != cells[hexX][hexY]){
+    //     currentHex = cells[hexX][hexY];
+    //     currentHex.Live();
+    //     currentHex.Draw();
+    // }
+  }
 }
 
 function getColor(n) {
-    var colors = ["#ccff66", "#FFD700", "#66ccff", "#ff6fcf", "#ff6666", "#ff921a"];
-    n %= colors.length;
-    return colors[n];
+  var colors = ["#ccff66", "#FFD700", "#66ccff", "#ff6fcf", "#ff6666", "#ff921a"];
+  n %= colors.length;
+  return colors[n];
 }
 
 function drawBoard(canvasContext, width, height) {
 
-    canvasContext.fillStyle = "#000000";
-    canvasContext.strokeStyle = "#CCCCCC";
-    canvasContext.lineWidth = 1;
+  canvasContext.fillStyle = "#000000";
+  canvasContext.strokeStyle = "#CCCCCC";
+  canvasContext.lineWidth = 1;
 
-    var i, j;
+  var i, j;
 
-    for (i = 0; i < width; ++i) {
-        for (j = 0; j < height; ++j) {
-            cells[i][j].Draw();
-        }
+  for (i = 0; i < width; ++i) {
+    for (j = 0; j < height; ++j) {
+      cells[i][j].Draw();
     }
+  }
 }
 
 function clearHexagon(canvasContext, x, y) {
 
-    canvasContext.fillStyle = "#fff"; //EDITOR = #000
+  canvasContext.fillStyle = "#fff"; //EDITOR = #000
 
-    // canvasContext.beginPath();
-    // canvasContext.moveTo(x + hexRadius, y);
-    // canvasContext.lineTo(x + hexRectangleWidth, y + hexHeight);
-    // canvasContext.lineTo(x + hexRectangleWidth, y + hexHeight + sideLength);
-    // canvasContext.lineTo(x + hexRadius, y + hexRectangleHeight);
-    // canvasContext.lineTo(x, y + sideLength + hexHeight);
-    // canvasContext.lineTo(x, y + hexHeight);
-    // canvasContext.closePath();
-    drawHexagon(canvasContext, x, y);
+  // canvasContext.beginPath();
+  // canvasContext.moveTo(x + hexRadius, y);
+  // canvasContext.lineTo(x + hexRectangleWidth, y + hexHeight);
+  // canvasContext.lineTo(x + hexRectangleWidth, y + hexHeight + sideLength);
+  // canvasContext.lineTo(x + hexRadius, y + hexRectangleHeight);
+  // canvasContext.lineTo(x, y + sideLength + hexHeight);
+  // canvasContext.lineTo(x, y + hexHeight);
+  // canvasContext.closePath();
+  drawHexagon(canvasContext, x, y);
 
-    canvasContext.stroke();
-    //ctx.fillStyle = "#fff";//EDITOR = #000
-    //canvasContext.fill();
+  canvasContext.stroke();
+  //ctx.fillStyle = "#fff";//EDITOR = #000
+  //canvasContext.fill();
 }
 
 function drawHexagon(canvasContext, x, y) {
 
-    canvasContext.beginPath();
-    canvasContext.moveTo(x + hexRadius, y);
-    canvasContext.lineTo(x + hexRectangleWidth, y + hexHeight);
-    canvasContext.lineTo(x + hexRectangleWidth, y + hexHeight + sideLength);
-    canvasContext.lineTo(x + hexRadius, y + hexRectangleHeight);
-    canvasContext.lineTo(x, y + sideLength + hexHeight);
-    canvasContext.lineTo(x, y + hexHeight);
-    canvasContext.closePath();
-    canvasContext.fill();
+  canvasContext.beginPath();
+  canvasContext.moveTo(x + hexRadius, y);
+  canvasContext.lineTo(x + hexRectangleWidth, y + hexHeight);
+  canvasContext.lineTo(x + hexRectangleWidth, y + hexHeight + sideLength);
+  canvasContext.lineTo(x + hexRadius, y + hexRectangleHeight);
+  canvasContext.lineTo(x, y + sideLength + hexHeight);
+  canvasContext.lineTo(x, y + hexHeight);
+  canvasContext.closePath();
+  canvasContext.fill();
 }
 
 function configureHexagonParameters() {
-    sideLength = canvas.height > canvas.width ? canvas.height / settings.boardHeight : canvas.width / settings.boardWidth;
-    hexHeight = Math.sin(hexagonAngle) * sideLength;
-    hexRadius = Math.cos(hexagonAngle) * sideLength;
-    hexRectangleHeight = sideLength + 2 * hexHeight;
-    hexRectangleWidth = 2 * hexRadius;
+  sideLength = canvas.height > canvas.width ? canvas.height / settings.boardHeight : canvas.width / settings.boardWidth;
+  hexHeight = Math.sin(hexagonAngle) * sideLength;
+  hexRadius = Math.cos(hexagonAngle) * sideLength;
+  hexRectangleHeight = sideLength + 2 * hexHeight;
+  hexRectangleWidth = 2 * hexRadius;
 }
 
 function loop() {
-    setTimeout(function () {
-        requestAnimationFrame(loop);
-        // Drawing code goes here
+  setTimeout(function () {
+    requestAnimationFrame(loop);
+    // Drawing code goes here
 
-        for (var i = 0; i < settings.boardWidth; i++) for (var j = 0; j < settings.boardHeight; j++) {
-            cells[i][j].Play();
-        }
+    for (var i = 0; i < settings.boardWidth; i++) for (var j = 0; j < settings.boardHeight; j++) {
+      cells[i][j].Play();
+    }
 
-        //ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawBoard(ctx, settings.boardWidth, settings.boardHeight);
-    }, settings.rate);
+    //ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawBoard(ctx, settings.boardWidth, settings.boardHeight);
+  }, settings.rate);
 }
 
 var PlayHexLife = React.createClass({
-    displayName: 'PlayHexLife',
+  displayName: 'PlayHexLife',
 
-    play: function () {
-        canvas = document.getElementById('hexMap');
+  play: function () {
+    canvas = document.getElementById('hexMap');
 
-        if (canvas.getContext) {
+    if (canvas.getContext) {
 
-            configureHexagonParameters();
+      configureHexagonParameters();
 
-            ctx = canvas.getContext('2d');
+      ctx = canvas.getContext('2d');
 
-            populateCellArray();
-            drawBoard(ctx, settings.boardWidth, settings.boardHeight);
+      populateCellArray();
+      drawBoard(ctx, settings.boardWidth, settings.boardHeight);
 
-            //this makes the assumption that mouse move was the last event
-            //as in, mouse up and then mouse up won't happen
+      //this makes the assumption that mouse move was the last event
+      //as in, mouse up and then mouse up won't happen
 
-            canvas.addEventListener("mousemove", function (eventInfo) {
-                mouseMoveResponse(eventInfo);
+      canvas.addEventListener("mousemove", function (eventInfo) {
+        mouseMoveResponse(eventInfo);
 
-                //if (last)
-                // settings.growth = tempSettings.growth;
-                // settings.overpopulation = tempSettings.overpopulation;
-                // settings.growth = tempSettings.growth;
-            });
+        //if (last)
+        // settings.growth = tempSettings.growth;
+        // settings.overpopulation = tempSettings.overpopulation;
+        // settings.growth = tempSettings.growth;
+      });
 
-            canvas.addEventListener("mouseup", function (eventInfo) {
-                inject(eventInfo);
+      canvas.addEventListener("mouseup", function (eventInfo) {
+        inject(eventInfo);
 
-                // tempSettings.growth = settings.growth;
-                // tempSettings.overpopulation = settings.overpopulation;
-                // tempSettings.starvation = settings.starvation;
-                //
-                // settings.growth = 4;
-                // settings.overpopulation = 6;
-                // settings.starvation = 2;
-            });
+        // tempSettings.growth = settings.growth;
+        // tempSettings.overpopulation = settings.overpopulation;
+        // tempSettings.starvation = settings.starvation;
+        //
+        // settings.growth = 4;
+        // settings.overpopulation = 6;
+        // settings.starvation = 2;
+      });
 
-            canvas.addEventListener("mouseout", this._mouseOutEvent);
+      canvas.addEventListener("mouseout", this._mouseOutEvent);
 
-            // canvas.addEventListener("mouseout", function(eventInfo){
-            //
-            //     inject(eventInfo);
-            //
-            //     if (this.props.viewMode == PlayConstants.PLAY_SPLIT_SCREEN){
-            //       tempSettings.growth = settings.growth;
-            //       tempSettings.overpopulation = settings.overpopulation;
-            //       tempSettings.starvation = settings.starvation;
-            //
-            //       settings.growth = 3;
-            //       settings.overpopulation = 4;
-            //       settings.starvation = 2;
-            //     }
-            // });
+      // canvas.addEventListener("mouseout", function(eventInfo){
+      //
+      //     inject(eventInfo);
+      //
+      //     if (this.props.viewMode == PlayConstants.PLAY_SPLIT_SCREEN){
+      //       tempSettings.growth = settings.growth;
+      //       tempSettings.overpopulation = settings.overpopulation;
+      //       tempSettings.starvation = settings.starvation;
+      //
+      //       settings.growth = 3;
+      //       settings.overpopulation = 4;
+      //       settings.starvation = 2;
+      //     }
+      // });
 
-            canvas.addEventListener("mouseenter", function (eventInfo) {
+      canvas.addEventListener("mouseenter", function (eventInfo) {
 
-                settings.growth = tempSettings.growth;
-                settings.overpopulation = tempSettings.overpopulation;
-                settings.starvation = settings.starvation;
-            });
+        settings.growth = tempSettings.growth;
+        settings.overpopulation = tempSettings.overpopulation;
+        settings.starvation = settings.starvation;
+      });
 
-            loop();
-        }
-    },
-    //react life cycle:
-    componentDidMount: function () {
-        this.play();
-    },
-    componentWillMount: function () {
-        settings = PlayDisplayAPI.getSettingDefaults(this.props.id);
-        cells = createCellArray();
-    },
-    componentWillUnmount: function () {
-        cells = [];
-    },
-    render: function () {
-
-        var canvasJSX = PlayDisplayAPI.getCanvasDisplay(this.props);
-
-        var iconGit = "fa fa-github fa-lg settingIcon" + this.props.focus;
-        var iconCompress = "fa fa-compress fa-lg settingIcon" + this.props.focus;
-        var iconRefresh = "fa fa-refresh fa-lg settingIcon" + this.props.focus;
-        //TODO make a lock boolean so it only saves after either
-        //editing a value or moving, or rather specifically NOT after
-        //a click
-        //get growth to work
-        var settingsJSX = this.props.settingsVisible ? React.createElement(
-            'div',
-            { className: 'settingsDiv' },
-            React.createElement(
-                'div',
-                { className: 'settingsDivTitle' },
-                React.createElement(
-                    'h2',
-                    null,
-                    this.props.name
-                )
-            ),
-            React.createElement(
-                'div',
-                { className: 'settingsDivSlider' },
-                React.createElement(
-                    'h3',
-                    { className: 'settingSectionH' },
-                    React.createElement(
-                        'a',
-                        { href: this.props.displayInfo.gitLink, target: '_blank' },
-                        React.createElement('i', { className: iconGit })
-                    ),
-                    React.createElement('i', { className: iconRefresh,
-                        onClick: this._reset }),
-                    React.createElement('i', { className: iconCompress,
-                        onClick: this._collapse })
-                )
-            ),
-            React.createElement(
-                'div',
-                { className: 'form' },
-                React.createElement(
-                    'div',
-                    { className: 'settingsDivSlider' },
-                    React.createElement(
-                        'h3',
-                        { className: 'settingSectionH' },
-                        'growth'
-                    ),
-                    React.createElement('input', {
-                        id: 'slider2',
-                        type: 'range',
-                        max: 6,
-                        min: 0,
-                        step: 1,
-                        value: settings.growth,
-                        onChange: this.handleGrowthChange
-                    }),
-                    React.createElement(
-                        'output',
-                        { id: 'range' },
-                        settings.growth
-                    )
-                ),
-                React.createElement(
-                    'div',
-                    { className: 'settingsDivSlider' },
-                    React.createElement(
-                        'h3',
-                        { className: 'settingSectionH' },
-                        'overpopulation'
-                    ),
-                    React.createElement('input', {
-                        id: 'slider2',
-                        type: 'range',
-                        max: 6,
-                        min: 0,
-                        step: 1,
-                        value: settings.overpopulation,
-                        onChange: this.handleOverpopulationChange
-                    }),
-                    React.createElement(
-                        'output',
-                        { id: 'range' },
-                        settings.overpopulation
-                    )
-                ),
-                React.createElement(
-                    'div',
-                    { className: 'settingsDivSlider' },
-                    React.createElement(
-                        'h3',
-                        { className: 'settingSectionH' },
-                        'starvation'
-                    ),
-                    React.createElement('input', {
-                        id: 'slider3',
-                        type: 'range',
-                        max: 6,
-                        min: 0,
-                        step: 1,
-                        value: settings.starvation,
-                        onChange: this.handleStarvationChange
-                    }),
-                    React.createElement(
-                        'output',
-                        { id: 'range' },
-                        settings.starvation
-                    )
-                ),
-                React.createElement(
-                    'div',
-                    { className: 'settingsDivSlider' },
-                    React.createElement(
-                        'h3',
-                        { className: 'settingSectionH' },
-                        'time'
-                    ),
-                    React.createElement('input', {
-                        id: 'slider4',
-                        type: 'range',
-                        max: 1000,
-                        min: 0,
-                        step: 10,
-                        value: settings.rate,
-                        onChange: this.handleRateChange
-                    }),
-                    React.createElement(
-                        'output',
-                        { id: 'range' },
-                        settings.rate / 1000
-                    )
-                ),
-                React.createElement(
-                    'div',
-                    { className: 'settingsDivSlider' },
-                    React.createElement(
-                        'h3',
-                        { className: 'settingSectionH' },
-                        'height'
-                    ),
-                    React.createElement('input', {
-                        id: 'slider4',
-                        type: 'range',
-                        max: 200,
-                        min: 0,
-                        step: 1,
-                        value: settings.boardHeight,
-                        onChange: this.handleBoardheightChange
-                    }),
-                    React.createElement(
-                        'output',
-                        { id: 'range' },
-                        settings.boardHeight
-                    )
-                ),
-                React.createElement(
-                    'div',
-                    { className: 'settingsDivSlider' },
-                    React.createElement(
-                        'h3',
-                        { className: 'settingSectionH' },
-                        'width'
-                    ),
-                    React.createElement('input', {
-                        id: 'slider4',
-                        type: 'range',
-                        max: 200,
-                        min: 0,
-                        step: 1,
-                        value: settings.boardWidth,
-                        onChange: this.handleBoardwidthChange
-                    }),
-                    React.createElement(
-                        'output',
-                        { id: 'range' },
-                        settings.boardWidth
-                    )
-                )
-            )
-        ) : null;
-
-        return React.createElement(
-            'div',
-            null,
-            React.createElement(
-                ReactCSSTransitionGroup,
-                {
-                    transitionName: 'settingsDiv',
-                    transitionEnterTimeout: 350,
-                    transitionLeaveTimeout: 350
-                },
-                settingsJSX
-            ),
-            canvasJSX
-        );
-    },
-    /**
-     * call action to focus on this particular pane.
-     */
-    _reset: function () {
-        settings = PlayDisplayAPI.getSettingDefaults(this.props.id);
-        this.forceUpdate();
-    },
-    /**
-     * call action to focus on this particular pane.
-     */
-    _collapse: function () {
-        PlayActions.goSplitViewMode(this.props.id);
-    },
-    /**
-     * growth setting needs to be updated
-     */
-    handleGrowthChange: function (e) {
-        settings.growth = e.target.value;
-        tempSettings.growth = e.target.value;
-        this.forceUpdate();
-    },
-    /**
-     * overpopulation setting needs to be updated
-     */
-    handleOverpopulationChange: function (e) {
-        settings.overpopulation = e.target.value;
-        tempSettings.overpopulation = e.target.value;
-        this.forceUpdate();
-    },
-    /**
-     * starvation setting needs to be updated
-     */
-    handleStarvationChange: function (e) {
-        settings.starvation = e.target.value;
-        tempSettings.starvation = e.target.value;
-        this.forceUpdate();
-    },
-    /**
-     * starvation setting needs to be updated
-     */
-    handleRateChange: function (e) {
-        settings.rate = e.target.value;
-        tempSettings.rate = e.target.value;
-        this.forceUpdate();
-    },
-    /**
-     * boardWidth setting needs to be updated
-     */
-    handleBoardwidthChange: function (e) {
-
-        clearTimeout(resizeId);
-        resizeId = setTimeout(function (o) {
-            settings.boardWidth = o.val;
-            onResizeDraw();
-            o.r.forceUpdate();
-        }, 100, { val: e.target.value, r: this });
-    },
-    /**
-     * boardHeight setting needs to be updated
-     */
-    handleBoardheightChange: function (e) {
-
-        clearTimeout(resizeId);
-        resizeId = setTimeout(function (o) {
-            settings.boardHeight = o.val;
-            onResizeDraw();
-            o.r.forceUpdate();
-        }, 100, { val: e.target.value, r: this });
-    },
-    _mouseOutEvent: function (e) {
-
-        if (this.props.viewMode == PlayConstants.PLAY_SPLIT_SCREEN) {
-            tempSettings.growth = settings.growth;
-            tempSettings.overpopulation = settings.overpopulation;
-            tempSettings.starvation = settings.starvation;
-
-            settings.growth = 3;
-            settings.overpopulation = 4;
-            settings.starvation = 2;
-        }
+      loop();
     }
+  },
+  //react life cycle:
+  componentDidMount: function () {
+    this.play();
+  },
+  componentWillMount: function () {
+    settings = PlayDisplayAPI.getSettingDefaults(this.props.id);
+    cells = createCellArray();
+  },
+  componentWillUnmount: function () {
+    cells = [];
+  },
+  render: function () {
+
+    var canvasJSX = PlayDisplayAPI.getCanvasDisplay(this.props);
+
+    var iconGit = "fa fa-github fa-lg settingIcon" + this.props.focus;
+    var iconCompress = "fa fa-compress fa-lg settingIcon" + this.props.focus;
+    var iconRefresh = "fa fa-refresh fa-lg settingIcon" + this.props.focus;
+    //TODO make a lock boolean so it only saves after either
+    //editing a value or moving, or rather specifically NOT after
+    //a click
+    //get growth to work
+    var settingsJSX = this.props.settingsVisible ? React.createElement(
+      'div',
+      { className: 'settingsDiv' },
+      React.createElement(
+        'div',
+        { className: 'settingsDivTitle' },
+        React.createElement(
+          'h2',
+          null,
+          this.props.name
+        )
+      ),
+      React.createElement(
+        'div',
+        { className: 'settingsDivSlider' },
+        React.createElement(
+          'h3',
+          { className: 'settingSectionH' },
+          React.createElement(
+            'a',
+            { href: this.props.displayInfo.gitLink, target: '_blank' },
+            React.createElement('i', { className: iconGit })
+          ),
+          React.createElement('i', { className: iconRefresh,
+            onClick: this._reset }),
+          React.createElement('i', { className: iconCompress,
+            onClick: this._collapse })
+        )
+      ),
+      React.createElement(
+        'div',
+        { className: 'form' },
+        React.createElement(
+          'div',
+          { className: 'settingsDivSlider' },
+          React.createElement(
+            'h3',
+            { className: 'settingSectionH' },
+            'growth'
+          ),
+          React.createElement('input', {
+            id: 'slider2',
+            type: 'range',
+            max: 6,
+            min: 0,
+            step: 1,
+            value: settings.growth,
+            onChange: this.handleGrowthChange
+          }),
+          React.createElement(
+            'output',
+            { id: 'range' },
+            settings.growth
+          )
+        ),
+        React.createElement(
+          'div',
+          { className: 'settingsDivSlider' },
+          React.createElement(
+            'h3',
+            { className: 'settingSectionH' },
+            'overpopulation'
+          ),
+          React.createElement('input', {
+            id: 'slider2',
+            type: 'range',
+            max: 6,
+            min: 0,
+            step: 1,
+            value: settings.overpopulation,
+            onChange: this.handleOverpopulationChange
+          }),
+          React.createElement(
+            'output',
+            { id: 'range' },
+            settings.overpopulation
+          )
+        ),
+        React.createElement(
+          'div',
+          { className: 'settingsDivSlider' },
+          React.createElement(
+            'h3',
+            { className: 'settingSectionH' },
+            'starvation'
+          ),
+          React.createElement('input', {
+            id: 'slider3',
+            type: 'range',
+            max: 6,
+            min: 0,
+            step: 1,
+            value: settings.starvation,
+            onChange: this.handleStarvationChange
+          }),
+          React.createElement(
+            'output',
+            { id: 'range' },
+            settings.starvation
+          )
+        ),
+        React.createElement(
+          'div',
+          { className: 'settingsDivSlider' },
+          React.createElement(
+            'h3',
+            { className: 'settingSectionH' },
+            'time'
+          ),
+          React.createElement('input', {
+            id: 'slider4',
+            type: 'range',
+            max: 1000,
+            min: 0,
+            step: 10,
+            value: settings.rate,
+            onChange: this.handleRateChange
+          }),
+          React.createElement(
+            'output',
+            { id: 'range' },
+            settings.rate / 1000
+          )
+        ),
+        React.createElement(
+          'div',
+          { className: 'settingsDivSlider' },
+          React.createElement(
+            'h3',
+            { className: 'settingSectionH' },
+            'height'
+          ),
+          React.createElement('input', {
+            id: 'slider4',
+            type: 'range',
+            max: 200,
+            min: 0,
+            step: 1,
+            value: settings.boardHeight,
+            onChange: this.handleBoardheightChange
+          }),
+          React.createElement(
+            'output',
+            { id: 'range' },
+            settings.boardHeight
+          )
+        ),
+        React.createElement(
+          'div',
+          { className: 'settingsDivSlider' },
+          React.createElement(
+            'h3',
+            { className: 'settingSectionH' },
+            'width'
+          ),
+          React.createElement('input', {
+            id: 'slider4',
+            type: 'range',
+            max: 200,
+            min: 0,
+            step: 1,
+            value: settings.boardWidth,
+            onChange: this.handleBoardwidthChange
+          }),
+          React.createElement(
+            'output',
+            { id: 'range' },
+            settings.boardWidth
+          )
+        )
+      )
+    ) : null;
+
+    return React.createElement(
+      'div',
+      null,
+      React.createElement(
+        ReactCSSTransitionGroup,
+        {
+          transitionName: 'settingsDiv',
+          transitionEnterTimeout: 350,
+          transitionLeaveTimeout: 350
+        },
+        settingsJSX
+      ),
+      canvasJSX
+    );
+  },
+  /**
+   * call action to focus on this particular pane.
+   */
+  _reset: function () {
+    settings = PlayDisplayAPI.getSettingDefaults(this.props.id);
+    this.forceUpdate();
+  },
+  /**
+   * call action to focus on this particular pane.
+   */
+  _collapse: function () {
+    PlayActions.goSplitViewMode(this.props.id);
+  },
+  /**
+   * growth setting needs to be updated
+   */
+  handleGrowthChange: function (e) {
+    settings.growth = e.target.value;
+    tempSettings.growth = e.target.value;
+    this.forceUpdate();
+  },
+  /**
+   * overpopulation setting needs to be updated
+   */
+  handleOverpopulationChange: function (e) {
+    settings.overpopulation = e.target.value;
+    tempSettings.overpopulation = e.target.value;
+    this.forceUpdate();
+  },
+  /**
+   * starvation setting needs to be updated
+   */
+  handleStarvationChange: function (e) {
+    settings.starvation = e.target.value;
+    tempSettings.starvation = e.target.value;
+    this.forceUpdate();
+  },
+  /**
+   * starvation setting needs to be updated
+   */
+  handleRateChange: function (e) {
+    settings.rate = e.target.value;
+    tempSettings.rate = e.target.value;
+    this.forceUpdate();
+  },
+  /**
+   * boardWidth setting needs to be updated
+   */
+  handleBoardwidthChange: function (e) {
+
+    clearTimeout(resizeId);
+    resizeId = setTimeout(function (o) {
+      settings.boardWidth = o.val;
+      onResizeDraw();
+      o.r.forceUpdate();
+    }, 100, { val: e.target.value, r: this });
+  },
+  /**
+   * boardHeight setting needs to be updated
+   */
+  handleBoardheightChange: function (e) {
+
+    clearTimeout(resizeId);
+    resizeId = setTimeout(function (o) {
+      settings.boardHeight = o.val;
+      onResizeDraw();
+      o.r.forceUpdate();
+    }, 100, { val: e.target.value, r: this });
+  },
+  _mouseOutEvent: function (e) {
+
+    if (this.props.viewMode == PlayConstants.PLAY_SPLIT_SCREEN) {
+      tempSettings.growth = settings.growth;
+      tempSettings.overpopulation = settings.overpopulation;
+      tempSettings.starvation = settings.starvation;
+
+      settings.growth = 3;
+      settings.overpopulation = 4;
+      settings.starvation = 2;
+    }
+  }
 });
 
 module.exports = PlayHexLife;
@@ -33830,16 +33846,7 @@ var PlayHubs = React.createClass({
     //get two-d context (as opposed to 3d)
     ctx = canvas.getContext('2d');
 
-    //configure the size of the canvas + thresholds
-    //this.configureCanvas();
-
-    //create all the stars, pseudo randomly
-    // phase 1: draw hubs
     this.drawStars();
-    // phase 2: draw edges
-    //drawEdges();
-
-    //loops
     this.loop();
   },
   loop: function () {
@@ -33853,13 +33860,9 @@ var PlayHubs = React.createClass({
     var l = settings.star_num;
     var ll = stars.length;
 
-    //if (l > ll)      this.createStars(l - ll);
-    //else if (ll > l) this.reduceStars (ll - l);
     if (l > ll) this.createStars(1);else if (ll > l) this.reduceStars(1);
-    // phase 1: move stars
-    this.moveStars();
 
-    // phase 2: draw stars & edges
+    this.moveStars();
     this.drawStars();
   },
   /**
@@ -34061,22 +34064,16 @@ var PlayHubs = React.createClass({
     );
   },
   handleStarNumChange: function (e) {
-
-    //document.getElementById('range1').innerHTML = e.target.value;
     settings.star_num = e.target.value;
     this.forceUpdate();
   },
   handleBridgeThresholdChange: function (e) {
-
     settings.threshold = e.target.value;
     this.forceUpdate();
-    //this.setState({ alpha: value });
   },
   handleAngleChange: function (e) {
-
     settings.angle = e.target.value;
     this.forceUpdate();
-    //this.setState({ alpha: value });
   },
   /**
    * call action to focus on this particular pane.
