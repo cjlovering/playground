@@ -34549,7 +34549,7 @@ var PlayStars = React.createClass({
    * call action to focus on this particular pane.
    */
   _reset: function () {
-    settings = PlayDisplayAPI.getSettingDefaults(this.props.id);
+    settings = PlayDisplayAPI.getSettingDefaults(this.props.id, 0);
     this.forceUpdate();
   },
   /**
