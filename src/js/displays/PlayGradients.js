@@ -37,14 +37,14 @@ var settings = {
   playing: true
 };
 
-//for now we're not gonna make the control box visible
+// By default, control box is not visisble.
+
 
 var PlayGradients = React.createClass({
   play: function(){
     canvas = document.getElementById('pixelMap');
 
-    if (canvas.getContext)
-    {
+    if (canvas.getContext) {
       ctx = canvas.getContext('2d');
       this.configureCanvas(settings.start, settings.end);
       configureColor();
@@ -61,10 +61,6 @@ var PlayGradients = React.createClass({
         paint();
         count += 1;
         if (count >= finish){
-            //ctx.clearRect(0, 0, height, width);
-            //console.log("count:", count);
-            //console.log("finish:", finish);
-
             randomColor();
             this.configureCanvas();
             count = 1;
@@ -79,13 +75,6 @@ var PlayGradients = React.createClass({
     }
   },
   configureCanvas: function(){
-    /*
-    var h = $(window).height();
-    var w = $(window).width();
-
-    canvas.width = w;
-    canvas.height = h;
-    */
     width = canvas.width;
     height = canvas.height;
 
@@ -105,39 +94,23 @@ var PlayGradients = React.createClass({
     ffx = xposition;
     ffy = yposition;
     var p = new Pixel(xposition, yposition);
-    var c = 0;
-
-    /*
-    //gonna try out not coloring it black
-    ctx.beginPath();
-    ctx.rect(0, 0, width, height);
-    ctx.fillStyle = "black";
-    ctx.fill();
-    */
-
     pixels[xposition][yposition] = p;
     p.Draw(xposition, yposition);
-
     return p;
   },
-  //react life cycle:
+
   componentDidMount: function(){
     finish = window.innerHeight * window.innerWidth;
     count = 0;
     this.play();
   },
-  componentWillUnmount: function(){
-
-  },
   handleBoostChange: function( e ) {
-    //document.getElementById('range1').innerHTML = e.target.value;
     settings.boost = e.target.value;
     this.forceUpdate();
   },
   handleIncrementChange: function( e ) {
     settings.increment = e.target.value;
     this.forceUpdate();
-    //this.setState({ alpha: value });
   },
   render: function() {
     if (this.props.viewMode == PlayConstants.PLAY_SPLIT_SCREEN)
@@ -230,8 +203,6 @@ var PlayGradients = React.createClass({
         </div>
       </div>
     </div>  : null;
-    //download, a pause/play, clear && reset
-
     return ( <div>
               <ReactCSSTransitionGroup
                      transitionName="settingsDiv"
@@ -244,9 +215,6 @@ var PlayGradients = React.createClass({
 
              </div>
            );
-
-
-  //  return PlayDisplayAPI.renderDisplay(this.props);
   },
   /**
    * download canvas as image
@@ -337,10 +305,7 @@ function setValidLocation(p) {
 
       pp = pixels[xx][yy];
 
-      if(pp == "EMPTY")
-      {
-          //xposition = Math.floor(width  * Math.random());
-          //yposition = Math.floor(height * Math.random());
+      if(pp == "EMPTY") {
           return;
       }
       var r;
@@ -357,43 +322,35 @@ function setValidLocation(p) {
       if ((yy - 1 >= 0) && pixels[xx][yy - 1] == "EMPTY"){
           openspots.push(3);
       }
-
-
       if ( openspots.length > 0 ){
           r = openspots[Math.floor((Math.random() * openspots.length))];
-         // if ()
-          switch(r)
-          {
+          switch(r) {
               case 0:
-                  if ((xx + 1 < width) && pixels[xx + 1][yy] == "EMPTY"){
+                  if ((xx + 1 < width) && pixels[xx + 1][yy] == "EMPTY") {
                       xxx = xx;
                       yyy = yy;
                       xx += 1;
-                      c = 9;
                   }
                   break;
               case 1:
-                  if ((yy + 1 < height) && pixels[xx][yy + 1] == "EMPTY"){
+                  if ((yy + 1 < height) && pixels[xx][yy + 1] == "EMPTY") {
                       xxx = xx;
                       yyy = yy;
                       yy += 1;
-                      c = 9;
                       }
                   break;
               case 2:
-                  if ((xx - 1 >= 0) && pixels[xx - 1][yy] == "EMPTY"){
+                  if ((xx - 1 >= 0) && pixels[xx - 1][yy] == "EMPTY") {
                       xxx = xx;
                       yyy = yy;
                       xx -= 1;
-                      c = 9;
                   }
                   break;
               case 3:
-                  if ((yy - 1 >= 0) && pixels[xx][yy - 1] == "EMPTY"){
+                  if ((yy - 1 >= 0) && pixels[xx][yy - 1] == "EMPTY") {
                       xxx = xx;
                       yyy = yy;
                       yy -= 1;
-                      c = 9;
                  }
                  break;
           }
@@ -411,8 +368,7 @@ function setValidLocation(p) {
           cr = pp.FromR();
           cb = pp.FromB();
           cg = pp.FromG();
-          if (xx == ffx && yy == ffy)
-          {
+          if (xx == ffx && yy == ffy) {
               xposition = Math.floor(width  * Math.random());
               yposition = Math.floor(height * Math.random());
               ffx = xposition;
@@ -420,9 +376,6 @@ function setValidLocation(p) {
               p.FromXX(ffx);
               p.FromYY(ffy);
               return p;
-              //ctx.clearRect(0, 0, width, height);
-              //count = 0;
-              //return configureCanvas();
           }
       }
   }
@@ -433,34 +386,18 @@ function floor(i){ return i | 0; }
 function nextColor()
 {
     //to start we'll one at a time
-    if (floor(cr) != er)
-    {
+    if (floor(cr) != er) {
         cr += settings.increment * shiftr;
     }
-    else if (floor(cg) != eg)
-    {
+    else if (floor(cg) != eg) {
         cg += settings.increment * shiftg;
     }
-    else if (floor(cb) != eb)
-    {
+    else if (floor(cb) != eb) {
         cb += settings.increment *  shiftb;
     }
-    else
-    {
-        /* flip start and end */
-        // var temp = start;
-        // start = end;
-        // end = start;
-        // var swap = ractive.get('end');
-        // ractive.set('end', ractive.get('start'));
-        // ractive.set('start', swap);
-        // configureColor();
+    else {
         reverseColor();
-        //cr = sr;
-        //cg = sg;
-        //cb = sb;
     }
-    //console.log(floor(cr), floor(cg), floor(cb));
     return rgb(floor(cr), floor(cg), floor(cb));
 }
 
@@ -510,10 +447,6 @@ function configureColor()
 
 function randomColor()
 {
-    //start = parseInt(start, 16);
-    //end   = parseInt(end, 16);
-    //sr, sg, sb
-
     sr = Math.floor(Math.random() * 255);
     sg = Math.floor(Math.random() * 255);
     sb = Math.floor(Math.random() * 255);
@@ -545,7 +478,7 @@ function fadeOut(){
       count -= 1;
       if (count == 0) { return; }
       else fadeOut();
-  }, 100); //ractive.get... r.get('rate')
+  }, 100);
 }
 
 module.exports = PlayGradients;
