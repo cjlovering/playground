@@ -9,7 +9,7 @@ view or by clicking on the gear icon.
 
 ## Live!
 
-http://playground.vision
+https://cjlovering.github.io/playground/
 
 ## Current active displays
 
